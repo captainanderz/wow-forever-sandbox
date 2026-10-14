@@ -57,7 +57,7 @@ Snapshot:  client\ is a frozen copy of the 1.60.1.70338 client made from your ow
            Battle.net never updates it. Check it with: ForeverSandbox snapshot verify "<this folder>\client"
 Data:      sandbox-data\ (characters, account data, saved locations, settings). Settings: sandbox.json.
 Commands:  .help in the game chat lists the sandbox commands (.fly, .speed, .tele, .loc, .walls, ...).
-Fog:       /fog off in the game removes all fog, /fog on brings it back. The map and scene fog part is a change in the
+Fog:       .fog off in the game chat removes all fog, .fog on brings it back. The map and scene fog part is a change in the
            running game's memory only (nothing on disk); "fullFogOff": false in sandbox.json turns that part off.
 Walls:     /walls in the game shows impassable terrain (the map's impass flag) as in-world walls: the sandbox's own
            translucent yellow/red wall models (added to client\ by ForeverSnapshot walls install; walls remove undoes it),

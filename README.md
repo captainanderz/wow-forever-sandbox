@@ -13,7 +13,7 @@ copies that exact build into a frozen local folder that Battle.net never updates
 - Login (Battle.net-style SRP over local TLS), character list and creation, world entry, movement, logout and relog.
 - Characters, account data (key bindings, macros, UI layout) and saved locations persist between runs.
 - Sandbox chat commands, listed by `.help` in game.
-- **No fog:** `/fog off` removes all fog, including the map and scene fog no game setting reaches. See
+- **No fog:** `.fog off` removes all fog, including the map and scene fog no game setting reaches. See
   [docs/fog.md](docs/fog.md).
 - **Impassable walls:** `/walls` shows the terrain the client treats as impassable, as translucent yellow/red walls in the
   world. See [docs/walls.md](docs/walls.md).
@@ -29,7 +29,8 @@ copies that exact build into a frozen local folder that Battle.net never updates
 | `.blink [yards]`, `.slowfall [on\|off]` | jump forward (default 20 yards), slow fall |
 | `.walls [on\|off\|overlay]`, `.walls glass faint\|light\|medium\|strong` | impassable terrain walls and their tint |
 | `.gob <display> [scale]`, `.gob clear` | place a test game object model |
-| `/fog off\|on`, `/walls ...` | fog off / back on, walls (SandboxTools addon; `/walls` takes the `.walls` options) |
+| `.fog off\|on` | remove all fog / bring it back |
+| `/walls ...` | same as `.walls ...` (SandboxTools addon) |
 
 ## Requirements
 
@@ -83,7 +84,7 @@ src/
   ForeverSnapshot/           client snapshot tool and the wall-model installer
   ForeverCertificates/       local loopback certificate tool
 tests/ForeverSandbox.Tests/  protocol and data tests
-addons/SandboxTools/         in-game addon (/fog, /walls)
+addons/SandboxTools/         in-game addon (client fog settings for .fog, /walls)
 data/hotfixes.json           shipped hotfix data (TACT keys)
 docs/                        how it works
 scripts/                     Build, Test, Publish

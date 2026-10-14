@@ -1,10 +1,10 @@
-// Full fog off (on by default; "fullFogOff": false in sandbox.json turns it off). The SandboxTools addon's /fog off turns the
-// client's volumetric-fog setting off; while that setting is off, this also turns off the two fog sources no setting reaches,
+// Full fog off (on by default; "fullFogOff": false in sandbox.json turns it off). The chat command .fog off makes the
+// SandboxTools addon turn the client's volumetric-fog setting off; while that setting is off, this also turns off the two fog sources no setting reaches,
 // in the running game's memory only:
 //   - Map.Flags[2] bit 15 of the current map's record in the client's in-memory Map table. The client re-derives its map-driven
 //     volumetric fog flag from that record every frame, so with the bit clear it keeps that fog off itself.
 //   - the main world scene's standard-fog switch (scene +0x71f).
-// /fog on (volumetric fog back on) restores exactly the values changed here. Executable code is never patched: the client
+// .fog on (volumetric fog back on) restores exactly the values changed here. Executable code is never patched: the client
 // checks its code and crashed about 48 s after a one-byte code patch (docs/fog.md). Writes go only to
 // committed private read/write data of the client this launcher started, re-validated while the client is paused. Nothing on
 // disk changes; it is gone when the game closes.
@@ -40,7 +40,7 @@ internal sealed class FogMonitor
         {
             if (!memory.Unsupported || reportedUnsupported) return null;
             reportedUnsupported = true;
-            return "the running game's image is not the expected 70338 layout; /fog off only changes the game's settings.";
+            return "the running game's image is not the expected 70338 layout; .fog off only changes the game's settings.";
         }
         if (memory.Data(StagedGraphicsFlags, 4) is not { } flags) return null;
         var status = (BinaryPrimitives.ReadUInt32LittleEndian(flags) & VolumeFogBit) == 0 ? Remove() : Restore();

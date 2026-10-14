@@ -335,6 +335,10 @@ internal static class WorldFixtures
             var player=new ForeverWorldPlayer(new ForeverCharacter{Counter=1},(op,p)=>sent.Add((op,p)),(_,_)=>{});
             Check(ForeverChat.HandleCommand("hello",player)==null && ForeverChat.HandleCommand(".speed 99",player).Contains("usage") && sent.Count==0,"Non-commands or bad speeds acted.");
             Check(ForeverChat.HandleCommand(".fly",player).Contains("on") && sent[0].op==0x600035 && player.CanFly,"Fly toggle failed.");
+            // .fog: the SandboxTools addon acts on these exact replies (FOG_OFF / FOG_ON in SandboxTools.lua); no packets of its own.
+            var fogSent=sent.Count;
+            Check(ForeverChat.HandleCommand(".fog off",player)=="Sandbox: fog off." && ForeverChat.HandleCommand(".FOG ON",player)=="Sandbox: fog on."
+                && ForeverChat.HandleCommand(".fog",player).Contains("usage") && sent.Count==fogSent,"Fog command replies changed.");
             Check(ForeverChat.HandleCommand(".flyspeed 5",player)!=null && sent.Count==7 && sent[5].op==0x600024 && BitConverter.ToSingle(sent[5].payload,10)==35f,"Flight speed multiplier failed.");
             Check(ForeverMovementPackets.MoveSetSpeed(ForeverCharacterPackets.PlayerGuid(1),3,7f).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08,3,0,0,0,0,0,0xE0,0x40}),"MoveSetSpeed layout changed.");
         });

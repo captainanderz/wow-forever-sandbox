@@ -94,9 +94,9 @@ internal static class Program
             client = Process.Start(new ProcessStartInfo(exe, "-config ForeverSandbox.wtf") { WorkingDirectory = programFolder, UseShellExecute = false })
                 ?? throw new InvalidOperationException("The game did not start.");
             Console.WriteLine($"World of Warcraft {manifest.GetProperty("version").GetString()} started from the frozen snapshot. Log in with admin / admin.");
-            Console.WriteLine("Type .help in chat for the sandbox commands, /fog off for no fog. Close the game to stop the sandbox.");
+            Console.WriteLine("Type .help in chat for the sandbox commands, .fog off for no fog. Close the game to stop the sandbox.");
             var monitor = realmKey == true ? new RealmKeyMonitor(client, ready.GetProperty("diagnosticLogPath").GetString()!, Path.Combine(state, "realm-key-patched")) : null;
-            // /fog off also clears the map and scene fog no game setting reaches (Fog.cs); "fullFogOff": false turns that off.
+            // .fog off also clears the map and scene fog no game setting reaches (Fog.cs); "fullFogOff": false turns that off.
             var fog = (bool?)settings["fullFogOff"] != false ? new FogMonitor(client) : null;
             // .walls (or /walls) draws impassable terrain walls over the game window (Walls.cs); the server writes them here.
             using var walls = new WallOverlay(client, Path.Combine(state, "impass-walls.json"));

@@ -127,7 +127,7 @@ internal sealed class ForeverWorldPlayer
         ForeverImpassWalls.Update(this);
         if (firstTime)
             RealmSend(ForeverChat.ChatOpcode, ForeverChat.SystemMessage((CanFly ? "Sandbox: flying is on - jump, then hold Space to climb." : "Sandbox: flying is off.")
-                + " Commands: .fly, .speed <n>, .flyspeed <n>, .tele, .loc, .blink, .slowfall, .walls, .gob, .help"));
+                + " Commands: .fly, .speed <n>, .flyspeed <n>, .tele, .loc, .blink, .slowfall, .fog, .walls, .gob, .help"));
     }
     private bool hinted;
 
@@ -236,6 +236,9 @@ internal sealed class ForeverWorldPlayer
 internal static class ForeverChat
 {
     public const uint ChatOpcode = 0x4C0001;   // SMSG_CHAT (retail 0x4A0001)
+    // .fog replies. The SandboxTools addon watches system messages for exactly these two lines and then changes the client's fog
+    // settings; the launcher clears the fog no setting reaches (src/ForeverSandbox/Fog.cs). Keep them in sync with the addon.
+    public const string FogOffReply = "Sandbox: fog off.", FogOnReply = "Sandbox: fog on.";
     // Client chat group 0x2D: SAY is 0x2D0023 by the reference's default mapping (retail 0x2C0023, same index), but this group is
     // partly renumbered in Classic (CHANNEL_LIST retail 0x11 -> 0x0F), so commands are accepted from any chat message opcode past the
     // channel requests; the exact-length check and the leading '.' keep other messages out.
@@ -311,6 +314,13 @@ internal static class ForeverChat
                 return slow ? "Sandbox: slow fall on." : "Sandbox: slow fall off.";
             case "tele" or "go":
                 return TeleportCommand(parts, player);
+            case "fog":
+                return (parts.Length > 1 ? parts[1].ToLowerInvariant() : "") switch
+                {
+                    "off" or "0" => FogOffReply,
+                    "on" or "1" => FogOnReply,
+                    _ => "Sandbox: usage .fog off | .fog on",
+                };
             case "walls":
                 return ForeverImpassWalls.Command(parts, player);
             case "gob":
@@ -328,9 +338,9 @@ internal static class ForeverChat
                 return string.Create(CultureInfo.InvariantCulture, $"Sandbox: map {c.Map} x {c.X:0.###} y {c.Y:0.###} z {c.Z:0.###} o {c.O:0.###}");
             case "help":
                 return "Sandbox commands: .fly [on|off] - toggle flying; .speed <n> - run/swim/fly speed multiplier; .flyspeed <n> - flight-only multiplier; "
-                    + ".tele <name> | .tele <x> <y> <z> [o] [map] - teleport; .loc [name] - show or save your position; .slowfall [on|off]; "
+                    + ".tele <name> | .tele <x> <y> <z> [o] [map] - teleport; .loc [name] - show or save your position; .slowfall [on|off]; .fog off|on - remove all fog, or bring it back; "
                     + ".walls [on|off|overlay] - show impassable terrain walls (game objects, or the launcher overlay); .walls glass faint|light|medium|strong - wall tint; .walls look <yellow> <red> [scale] - force fields instead; "
-                    + ".gob <display> [scale] | .gob clear - try a game object model. Client side (Sandbox Tools addon): /fog off|on, /walls.";
+                    + ".gob <display> [scale] | .gob clear - try a game object model. Client side (Sandbox Tools addon): /walls (same as .walls).";
             default:
                 return $"Sandbox: unknown command .{parts[0]} - try .help";
         }
