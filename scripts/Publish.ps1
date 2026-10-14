@@ -28,6 +28,9 @@ foreach ($folder in 'server', 'tools') {
     Get-ChildItem -LiteralPath $target -Filter *.pdb -Recurse | Remove-Item
 }
 Copy-Item -LiteralPath (Join-Path $staging 'launcher/ForeverSandbox.exe') -Destination (Join-Path $root 'ForeverSandbox.exe') -Force
+# The license texts travel with the binaries (the MIT and BSD licenses of the bundled code require it).
+Copy-Item -LiteralPath (Join-Path $RepoRoot 'LICENSE') -Destination (Join-Path $root 'LICENSE.txt') -Force
+Copy-Item -LiteralPath (Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md') -Destination (Join-Path $root 'THIRD-PARTY-NOTICES.txt') -Force
 
 # Shipped data (the TACT key hotfixes) is refreshed; the player's own files in sandbox-data\ are never touched.
 $data = Join-Path $root 'sandbox-data'

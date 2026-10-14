@@ -7,9 +7,8 @@
         <AnalysisLevel>4</AnalysisLevel>
     </PropertyGroup>
 
-    <Import Project="..\Google.Protobuf\Google.Protobuf.projitems" Label="Shared" />
-
     <ItemGroup>
+        <PackageReference Include="Google.Protobuf" Version="3.36.2" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     </ItemGroup>
 

@@ -80,7 +80,6 @@ src/
   ForeverSandbox/            launcher (ForeverSandbox.exe): certificates, server and client start, realm key, fog, wall overlay
   ForeverSandbox.Server/     server: Battle.net login, realm list, 1.60.1.70338 world protocol (WorldServer/Network/Forever*.cs)
   ForeverSandbox.Framework/  shared protocol, crypto and Battle.net protobuf types
-  Google.Protobuf/           protobuf runtime (shared project)
   ForeverSnapshot/           client snapshot tool and the wall-model installer
   ForeverCertificates/       local loopback certificate tool
 tests/ForeverSandbox.Tests/  protocol and data tests

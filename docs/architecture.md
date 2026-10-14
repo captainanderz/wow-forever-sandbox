@@ -5,7 +5,7 @@ Forever Sandbox is four programs and an addon. The player only ever starts `Fore
 | Component | Source | Output in the product folder |
 | --- | --- | --- |
 | Launcher | `src/ForeverSandbox` | `ForeverSandbox.exe` |
-| Server | `src/ForeverSandbox.Server`, `src/ForeverSandbox.Framework`, `src/Google.Protobuf` | `server\ForeverSandbox.Server.exe` |
+| Server | `src/ForeverSandbox.Server`, `src/ForeverSandbox.Framework` | `server\ForeverSandbox.Server.exe` |
 | Snapshot tool | `src/ForeverSnapshot` | `tools\ForeverSnapshot.exe` |
 | Certificate tool | `src/ForeverCertificates` | `tools\ForeverCertificates.exe` |
 | SandboxTools addon | `addons/SandboxTools` | `client\_classic_beta_\Interface\AddOns\SandboxTools` |
