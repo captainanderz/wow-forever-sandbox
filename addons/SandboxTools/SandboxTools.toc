@@ -1,0 +1,5 @@
+## Interface: 16001
+## Title: Sandbox Tools
+## Notes: Forever Sandbox client-side helpers. /fog off|on; /sandbox cvars [filter] lists the client's settings and console commands.
+## SavedVariables: SandboxToolsDump, SandboxToolsSettings
+SandboxTools.lua

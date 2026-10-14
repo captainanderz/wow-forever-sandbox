@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <WarningLevel>4</WarningLevel>
+        <Configurations>Debug;Release</Configurations>
+        <AnalysisLevel>4</AnalysisLevel>
+    </PropertyGroup>
+
+    <Import Project="..\Google.Protobuf\Google.Protobuf.projitems" Label="Shared" />
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    </ItemGroup>
+
+</Project>

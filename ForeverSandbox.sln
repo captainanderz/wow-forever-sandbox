@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{096F67EC-22BE-4FC7-BAEC-3DC0BBF783FC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverSandbox", "src\ForeverSandbox\ForeverSandbox.csproj", "{6B01FDC6-1489-422C-B70E-0336E5D8B7F0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverSandbox.Server", "src\ForeverSandbox.Server\ForeverSandbox.Server.csproj", "{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverSandbox.Framework", "src\ForeverSandbox.Framework\ForeverSandbox.Framework.csproj", "{032FB7FC-D883-4F34-BB2E-D09E63E65975}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverSnapshot", "src\ForeverSnapshot\ForeverSnapshot.csproj", "{82C04485-6F59-40E1-AC51-770FE27AF954}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverCertificates", "src\ForeverCertificates\ForeverCertificates.csproj", "{6C512061-CA76-4B47-9516-2147B74F76BF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ForeverSandbox.Tests", "tests\ForeverSandbox.Tests\ForeverSandbox.Tests.csproj", "{E66A2217-0C31-4351-9406-A3BB00FB36D0}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Google.Protobuf", "src\Google.Protobuf\Google.Protobuf.shproj", "{78833ED7-D11A-4858-B90A-503BBF2E8C45}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\Google.Protobuf\Google.Protobuf.projitems*{032fb7fc-d883-4f34-bb2e-d09e63e65975}*SharedItemsImports = 5
+		src\Google.Protobuf\Google.Protobuf.projitems*{78833ed7-d11a-4858-b90a-503bbf2e8c45}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6B01FDC6-1489-422C-B70E-0336E5D8B7F0}.Debug|x64.ActiveCfg = Debug|x64
+		{6B01FDC6-1489-422C-B70E-0336E5D8B7F0}.Debug|x64.Build.0 = Debug|x64
+		{6B01FDC6-1489-422C-B70E-0336E5D8B7F0}.Release|x64.ActiveCfg = Release|x64
+		{6B01FDC6-1489-422C-B70E-0336E5D8B7F0}.Release|x64.Build.0 = Release|x64
+		{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE}.Debug|x64.ActiveCfg = Debug|x64
+		{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE}.Debug|x64.Build.0 = Debug|x64
+		{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE}.Release|x64.ActiveCfg = Release|x64
+		{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE}.Release|x64.Build.0 = Release|x64
+		{032FB7FC-D883-4F34-BB2E-D09E63E65975}.Debug|x64.ActiveCfg = Debug|x64
+		{032FB7FC-D883-4F34-BB2E-D09E63E65975}.Debug|x64.Build.0 = Debug|x64
+		{032FB7FC-D883-4F34-BB2E-D09E63E65975}.Release|x64.ActiveCfg = Release|x64
+		{032FB7FC-D883-4F34-BB2E-D09E63E65975}.Release|x64.Build.0 = Release|x64
+		{82C04485-6F59-40E1-AC51-770FE27AF954}.Debug|x64.ActiveCfg = Debug|x64
+		{82C04485-6F59-40E1-AC51-770FE27AF954}.Debug|x64.Build.0 = Debug|x64
+		{82C04485-6F59-40E1-AC51-770FE27AF954}.Release|x64.ActiveCfg = Release|x64
+		{82C04485-6F59-40E1-AC51-770FE27AF954}.Release|x64.Build.0 = Release|x64
+		{6C512061-CA76-4B47-9516-2147B74F76BF}.Debug|x64.ActiveCfg = Debug|x64
+		{6C512061-CA76-4B47-9516-2147B74F76BF}.Debug|x64.Build.0 = Debug|x64
+		{6C512061-CA76-4B47-9516-2147B74F76BF}.Release|x64.ActiveCfg = Release|x64
+		{6C512061-CA76-4B47-9516-2147B74F76BF}.Release|x64.Build.0 = Release|x64
+		{E66A2217-0C31-4351-9406-A3BB00FB36D0}.Debug|x64.ActiveCfg = Debug|x64
+		{E66A2217-0C31-4351-9406-A3BB00FB36D0}.Debug|x64.Build.0 = Debug|x64
+		{E66A2217-0C31-4351-9406-A3BB00FB36D0}.Release|x64.ActiveCfg = Release|x64
+		{E66A2217-0C31-4351-9406-A3BB00FB36D0}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6B01FDC6-1489-422C-B70E-0336E5D8B7F0} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+		{AF69942A-BC57-4A2A-B9F1-34E7ADDE36BE} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+		{032FB7FC-D883-4F34-BB2E-D09E63E65975} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+		{82C04485-6F59-40E1-AC51-770FE27AF954} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+		{6C512061-CA76-4B47-9516-2147B74F76BF} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+		{E66A2217-0C31-4351-9406-A3BB00FB36D0} = {096F67EC-22BE-4FC7-BAEC-3DC0BBF783FC}
+		{78833ED7-D11A-4858-B90A-503BBF2E8C45} = {5E904DA7-6E9B-4A6B-9689-31AA04B7C0F0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D9BE703C-2A2A-45D9-A2D5-F26BED3A6C16}
+	EndGlobalSection
+EndGlobal

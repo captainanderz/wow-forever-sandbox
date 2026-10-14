@@ -1,0 +1,30 @@
+{
+  "repository": "https://github.com/advocaite/TrinityCore",
+  "commit": "5a125dfe7031b8abc2a0e32c487a9351577aff0d",
+  "files": [
+    {
+      "path": "src/server/game/Entities/Object/Updates/UpdateFields.h",
+      "gitBlobSha1": "8519ec7ad66a694669d7ef1c8ca7d7556940def6"
+    },
+    {
+      "path": "src/server/game/Entities/Object/Updates/UpdateFields.cpp",
+      "gitBlobSha1": "3b623ce2e3790d91fdf8bb8d3cb98b9b6b87cee5"
+    },
+    {
+      "path": "sql/custom/hotfixes/2026_09_28_01_hotfixes_classic_tact_keys.sql",
+      "gitBlobSha1": "fbd9e0410df386d41b6caaa3f165aa21cad36686"
+    },
+    {
+      "path": "sql/custom/hotfixes/2026_09_29_00_hotfixes_classic_sync.sql",
+      "gitBlobSha1": "f9bef4280a8e1324fade4fcb885b4e0a15c90f13"
+    },
+    {
+      "path": "sql/custom/hotfixes/2026_10_01_02_hotfixes_forever_sniff.sql",
+      "gitBlobSha1": "df948555a120fe86456e00c660547f42065c9ae7"
+    },
+    {
+      "path": "COPYING",
+      "gitBlobSha1": "cdbe93b520be9e38c151a26cadf465d6880b7423"
+    }
+  ]
+}

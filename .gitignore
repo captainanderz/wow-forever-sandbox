@@ -1,0 +1,43 @@
+# Build output and local caches
+artifacts/
+publish/
+.cache/
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.log
+__pycache__/
+
+# Pinned reference files fetched by tools/Fetch-Reference.ps1
+/tools/reference/
+
+# Certificates and keys
+*.pfx
+*.p12
+*.key
+*.pem
+*.cer
+
+# Blizzard client files: never commit a client snapshot or install (bring your own client)
+.build.info
+.flavor.info
+.product.db
+snapshot.json
+snapshot-progress.json
+_classic_beta_/
+Data/data/
+Data/config/
+Data/indices/
+WTF/
+Cache/
+*.idx
+data.[0-9][0-9][0-9]
+WowB*.exe
+WowB*.dll
+
+# Personal sandbox data and settings
+/data/*
+!/data/hotfixes.json
+sandbox.json

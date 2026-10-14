@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>ForeverSandbox.Server</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <StartupObject>AuthServer.LocalServerHost</StartupObject>
+        <TargetFramework>net8.0</TargetFramework>
+        <RuntimeIdentifiers>win-x64;osx-x64</RuntimeIdentifiers>
+        <AnalysisLevel>4</AnalysisLevel>
+        <WarningLevel>4</WarningLevel>
+        <Product>Forever Sandbox server</Product>
+        <AssemblyTitle>Forever Sandbox server</AssemblyTitle>
+        <Description>Forever Sandbox server</Description>
+        <NeutralLanguage>en-US</NeutralLanguage>
+        <IlcGenerateStackTraceData>false</IlcGenerateStackTraceData>
+        <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+        <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+        <Configurations>Debug;Release</Configurations>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <DefineConstants>DEBUG;TRACE</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Release'">
+        <DefineConstants>TRACE;PUBLIC</DefineConstants>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+
+    <!-- Game data tables, read with GetManifestResourceStream("ForeverSandbox.Server.Resources.<name>"). -->
+    <ItemGroup>
+        <None Remove="Resources\**" />
+        <EmbeddedResource Include="Resources\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <RdXmlFile Include="rd.xml" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\ForeverSandbox.Framework\ForeverSandbox.Framework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="System.IO.Hashing" Version="9.0.2" />
+    </ItemGroup>
+
+</Project>

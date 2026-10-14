@@ -1,0 +1,9 @@
+<Project>
+  <!-- Shared by every project: x64 only, locked NuGet restores, build output under artifacts\ (not inside src\). -->
+  <PropertyGroup>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+  </PropertyGroup>
+</Project>

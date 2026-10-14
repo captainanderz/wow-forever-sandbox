@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="srp-v2-vectors.json" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldWire.cs" Link="ForeverWorldWire.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldCrypto.cs" Link="ForeverWorldCrypto.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldPackets.cs" Link="ForeverWorldPackets.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldHandshake.cs" Link="ForeverWorldHandshake.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/Ed25519Ctx.cs" Link="Ed25519Ctx.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverCharacters.cs" Link="ForeverCharacters.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverBattlenetRelay.cs" Link="ForeverBattlenetRelay.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverHotfixes.cs" Link="ForeverHotfixes.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldEntry.cs" Link="ForeverWorldEntry.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverFlight.cs" Link="ForeverFlight.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverTeleport.cs" Link="ForeverTeleport.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverCasc.cs" Link="ForeverCasc.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverTerrain.cs" Link="ForeverTerrain.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverImpass.cs" Link="ForeverImpass.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverGameObjects.cs" Link="ForeverGameObjects.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWallModels.cs" Link="ForeverWallModels.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverSpells.cs" Link="ForeverSpells.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverUpdateFields.g.cs" Link="ForeverUpdateFields.g.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/LocalAuthDiagnostics.cs" Link="LocalAuthDiagnostics.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsAccountV2.cs" Link="BgsAccountV2.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsRealmV2.cs" Link="BgsRealmV2.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsFrameReader.cs" Link="BgsFrameReader.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsConnectionHandshake.cs" Link="BgsConnectionHandshake.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsDemoAuthentication.cs" Link="BgsDemoAuthentication.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/BgsAuthenticationV2.cs" Link="BgsAuthenticationV2.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/DemoSrpSession.cs" Link="DemoSrpSession.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/LocalHttpReader.cs" Link="LocalHttpReader.cs" />
+    <Compile Include="../../src/ForeverSandbox.Server/AuthServer/Network/LocalLoginRest.cs" Link="LocalLoginRest.cs" />
+    <ProjectReference Include="../../src/ForeverSandbox.Framework/ForeverSandbox.Framework.csproj" />
+  </ItemGroup>
+</Project>

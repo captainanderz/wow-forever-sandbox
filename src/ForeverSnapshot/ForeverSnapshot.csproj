@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Frozen client snapshot: copies one build (1.60.1.70338) out of the shared Battle.net storage into a standalone install. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyName>ForeverSnapshot</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../ForeverSandbox.Server/WorldServer/Network/ForeverCasc.cs" Link="ForeverCasc.cs" />
+    <Compile Include="../ForeverSandbox.Server/WorldServer/Network/ForeverWallModels.cs" Link="ForeverWallModels.cs" />
+  </ItemGroup>
+</Project>
