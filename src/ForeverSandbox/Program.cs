@@ -98,7 +98,7 @@ internal static class Program
             var monitor = realmKey == true ? new RealmKeyMonitor(client, ready.GetProperty("diagnosticLogPath").GetString()!, Path.Combine(state, "realm-key-patched")) : null;
             // .fog off also clears the map and scene fog no game setting reaches (Fog.cs); "fullFogOff": false turns that off.
             var fog = (bool?)settings["fullFogOff"] != false ? new FogMonitor(client) : null;
-            // .walls (or /walls) draws impassable terrain walls over the game window (Walls.cs); the server writes them here.
+            // .walls overlay draws impassable terrain walls over the game window (Walls.cs); the server writes them here.
             using var walls = new WallOverlay(client, Path.Combine(state, "impass-walls.json"));
             var stop = false;
             Console.CancelKeyPress += (_, e) => { e.Cancel = true; stop = true; };

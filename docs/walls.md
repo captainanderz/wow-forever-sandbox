@@ -1,6 +1,6 @@
 # Impassable walls
 
-`/walls` (or `.walls` in chat) shows where the terrain itself blocks movement.
+`.walls` in chat shows where the terrain itself blocks movement.
 
 ## Which terrain is impassable
 

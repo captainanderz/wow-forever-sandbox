@@ -15,7 +15,7 @@ copies that exact build into a frozen local folder that Battle.net never updates
 - Sandbox chat commands, listed by `.help` in game.
 - **No fog:** `.fog off` removes all fog, including the map and scene fog no game setting reaches. See
   [docs/fog.md](docs/fog.md).
-- **Impassable walls:** `/walls` shows the terrain the client treats as impassable, as translucent yellow/red walls in the
+- **Impassable walls:** `.walls` shows the terrain the client treats as impassable, as translucent yellow/red walls in the
   world. See [docs/walls.md](docs/walls.md).
 
 ### Commands
@@ -30,7 +30,6 @@ copies that exact build into a frozen local folder that Battle.net never updates
 | `.walls [on\|off\|overlay]`, `.walls glass faint\|light\|medium\|strong` | impassable terrain walls and their tint |
 | `.gob <display> [scale]`, `.gob clear` | place a test game object model |
 | `.fog off\|on` | remove all fog / bring it back |
-| `/walls ...` | same as `.walls ...` (SandboxTools addon) |
 
 ## Requirements
 
@@ -84,7 +83,7 @@ src/
   ForeverSnapshot/           client snapshot tool and the wall-model installer
   ForeverCertificates/       local loopback certificate tool
 tests/ForeverSandbox.Tests/  protocol and data tests
-addons/SandboxTools/         in-game addon (client fog settings for .fog, /walls)
+addons/SandboxTools/         in-game addon (client fog settings for .fog)
 data/hotfixes.json           shipped hotfix data (TACT keys)
 docs/                        how it works
 scripts/                     Build, Test, Publish

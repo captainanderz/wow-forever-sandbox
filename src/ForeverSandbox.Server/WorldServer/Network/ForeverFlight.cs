@@ -340,7 +340,7 @@ internal static class ForeverChat
                 return "Sandbox commands: .fly [on|off] - toggle flying; .speed <n> - run/swim/fly speed multiplier; .flyspeed <n> - flight-only multiplier; "
                     + ".tele <name> | .tele <x> <y> <z> [o] [map] - teleport; .loc [name] - show or save your position; .slowfall [on|off]; .fog off|on - remove all fog, or bring it back; "
                     + ".walls [on|off|overlay] - show impassable terrain walls (game objects, or the launcher overlay); .walls glass faint|light|medium|strong - wall tint; .walls look <yellow> <red> [scale] - force fields instead; "
-                    + ".gob <display> [scale] | .gob clear - try a game object model. Client side (Sandbox Tools addon): /walls (same as .walls).";
+                    + ".gob <display> [scale] | .gob clear - try a game object model.";
             default:
                 return $"Sandbox: unknown command .{parts[0]} - try .help";
         }

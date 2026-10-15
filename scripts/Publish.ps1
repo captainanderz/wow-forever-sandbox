@@ -59,10 +59,10 @@ Data:      sandbox-data\ (characters, account data, saved locations, settings). 
 Commands:  .help in the game chat lists the sandbox commands (.fly, .speed, .tele, .loc, .walls, ...).
 Fog:       .fog off in the game chat removes all fog, .fog on brings it back. The map and scene fog part is a change in the
            running game's memory only (nothing on disk); "fullFogOff": false in sandbox.json turns that part off.
-Walls:     /walls in the game shows impassable terrain (the map's impass flag) as in-world walls: the sandbox's own
+Walls:     .walls in the game chat shows impassable terrain (the map's impass flag) as in-world walls: the sandbox's own
            translucent yellow/red wall models (added to client\ by ForeverSnapshot walls install; walls remove undoes it),
-           /walls glass faint|light|medium|strong changes their tint, /walls look <yellow> <red> uses game force fields
-           instead, /walls overlay draws them over the game window, /walls off hides them.
+           .walls glass faint|light|medium|strong changes their tint, .walls look <yellow> <red> uses game force fields
+           instead, .walls overlay draws them over the game window, .walls off hides them.
 Never share client\ - it holds Blizzard's game files.
 "@ | Set-Content -LiteralPath (Join-Path $root 'README.txt')
 Remove-Item -LiteralPath $staging -Recurse -Force

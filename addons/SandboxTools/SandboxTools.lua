@@ -1,6 +1,5 @@
 -- Forever Sandbox client-side helpers, using only the game's own Lua API.
 -- .fog off|on (server chat command) changes the client's own fog settings through this addon (see below)
--- /walls [on|off|overlay]   impassable terrain walls: forwards to the sandbox server's .walls command
 -- /sandbox cvars [filter]   lists settings (CVars) and console commands whose name or help text contains filter (default "fog")
 -- Every setting (value, default, flags) and console command is also saved to SandboxToolsDump (WTF\Account\...\SavedVariables)
 -- at login and logout, so the full list can be read outside the game.
@@ -96,14 +95,6 @@ local function SetFog(off)
     end
 end
 
--- /walls: the server draws impassable terrain walls (MCNK impass flag) as game objects, or the launcher as an overlay.
--- The server answers dot commands in chat itself; the slash command only saves typing the dot.
-SLASH_SANDBOXWALLS1 = "/walls"
-SlashCmdList.SANDBOXWALLS = function(message)
-    local args = (message or ""):match("^%s*(.-)%s*$")
-    SendChatMessage(args == "" and ".walls" or (".walls " .. args), "SAY")
-end
-
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("PLAYER_LOGOUT")
@@ -116,6 +107,6 @@ frame:SetScript("OnEvent", function(_, event, text)
     Dump()
     if event == "PLAYER_LOGIN" then
         local fogOff = SandboxToolsSettings and SandboxToolsSettings.fogOff
-        print(("Sandbox Tools loaded%s. Commands: .help (server), /walls, /sandbox cvars <filter>."):format(fogOff and " (fog is off: .fog on brings it back)" or ""))
+        print(("Sandbox Tools loaded%s. Commands: .help (server), /sandbox cvars <filter>."):format(fogOff and " (fog is off: .fog on brings it back)" or ""))
     end
 end)

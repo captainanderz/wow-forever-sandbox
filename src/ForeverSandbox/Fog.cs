@@ -1,6 +1,6 @@
 // Full fog off (on by default; "fullFogOff": false in sandbox.json turns it off). The chat command .fog off makes the
-// SandboxTools addon turn the client's volumetric-fog setting off; while that setting is off, this also turns off the two fog sources no setting reaches,
-// in the running game's memory only:
+// SandboxTools addon turn the client's volumetric-fog setting off; while that setting is off, this also turns off the two
+// fog sources no setting reaches, in the running game's memory only:
 //   - Map.Flags[2] bit 15 of the current map's record in the client's in-memory Map table. The client re-derives its map-driven
 //     volumetric fog flag from that record every frame, so with the bit clear it keeps that fog off itself.
 //   - the main world scene's standard-fog switch (scene +0x71f).
