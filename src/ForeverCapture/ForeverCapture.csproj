@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Forever Capture: records the game objects the live server sends to your own game. A local login relay learns the two
+       realm-join secrets, Windows' own packet monitor records the world connections, and the decoder turns the recording into
+       object placements. The game process is never opened, read or changed. The key derivation and the Battle.net attribute
+       reader are the sandbox server's own files, compiled in here. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <AssemblyName>ForeverCapture</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../ForeverSandbox.Server/WorldServer/Network/ForeverWorldCrypto.cs" Link="Shared/ForeverWorldCrypto.cs" />
+    <Compile Include="../ForeverSandbox.Server/WorldServer/Network/Ed25519Ctx.cs" Link="Shared/Ed25519Ctx.cs" />
+    <Compile Include="../ForeverSandbox.Server/AuthServer/Network/BgsRealmV2.cs" Link="Shared/BgsRealmV2.cs" />
+    <Compile Include="../ForeverSandbox.Server/WorldServer/Network/ForeverCasc.cs" Link="Shared/ForeverCasc.cs" />
+    <EmbeddedResource Include="LiveMap.js" LogicalName="LiveMap.js" />
+    <EmbeddedResource Include="Objects3D.js" LogicalName="Objects3D.js" />
+    <ProjectReference Include="../ForeverSandbox.Framework/ForeverSandbox.Framework.csproj" />
+  </ItemGroup>
+</Project>

@@ -77,7 +77,9 @@ internal sealed class ForeverCasc : IDisposable
         }
         foreach (var (bucket, (_, path)) in latest)
         {
-            var raw = File.ReadAllBytes(path);
+            // Battle.net and a running game keep the index files open for writing: read them without exclusive access.
+            byte[] raw;
+            using (var index = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete)) { raw = new byte[index.Length]; index.ReadExactly(raw); }
             var headerSize = BinaryPrimitives.ReadInt32LittleEndian(raw);
             int sizeBytes = raw[12], offsetBytes = raw[13], keyBytes = raw[14], offsetBits = raw[15];
             var entriesOffset = (8 + headerSize + 15) & ~15;

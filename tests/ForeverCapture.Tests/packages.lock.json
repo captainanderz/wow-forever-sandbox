@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net8.0": {
+      "Google.Protobuf": {
+        "type": "Transitive",
+        "resolved": "3.36.2",
+        "contentHash": "Ci1q1iJg74qAE5riTA2FbMS0wPbpruPQI/JQ9DrAsRo2VsSxgt1e/pmxGxgrci+pXJEgrSYg2vPl8rrStZkclQ=="
+      },
+      "Newtonsoft.Json": {
+        "type": "Transitive",
+        "resolved": "13.0.3",
+        "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
+      },
+      "foreversandbox.framework": {
+        "type": "Project",
+        "dependencies": {
+          "Google.Protobuf": "[3.36.2, )",
+          "Newtonsoft.Json": "[13.0.3, )"
+        }
+      }
+    }
+  }
+}
