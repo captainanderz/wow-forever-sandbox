@@ -330,4 +330,15 @@ if (Environment.GetEnvironmentVariable("FOREVER_CAPTURE_NPCAP_TEST") == "1")
     Console.WriteLine($"Npcap: {seen} packets recorded live and read back from the file.");
 }
 
-Console.WriteLine("ForeverCapture round trip passed: join tap, pcapng + TCP reassembly, key search, decryption, inflation, " + spawns.Length + " game objects, the character's path.");
+// CDN files are checked against their encoding key: MD5 of the whole stream without a chunk table, else of the header.
+{
+    var single = Encoding.ASCII.GetBytes("BLTE").Concat(new byte[4]).Concat(Encoding.ASCII.GetBytes("Ntexture")).ToArray();
+    Check(GameCdn.Matches(single, MD5.HashData(single)), "a single-chunk stream did not match its key");
+    var chunked = new byte[48]; Encoding.ASCII.GetBytes("BLTE").CopyTo(chunked, 0); BinaryPrimitives.WriteInt32BigEndian(chunked.AsSpan(4), 36); chunked[47] = 7;
+    Check(GameCdn.Matches(chunked, MD5.HashData(chunked.AsSpan(0, 36))), "a chunked stream did not match the MD5 of its header");
+    chunked[20] ^= 1;
+    Check(!GameCdn.Matches(chunked, MD5.HashData(chunked.AsSpan(0, 36)).Select((b, i) => i == 0 ? (byte)(b ^ 1) : b).ToArray()), "a changed stream still matched");
+    Check(!GameCdn.Matches(Encoding.ASCII.GetBytes("<html>not found</html>"), MD5.HashData(single)), "a page that is no BLTE stream matched");
+}
+
+Console.WriteLine("ForeverCapture round trip passed: join tap, pcapng + TCP reassembly, key search, decryption, inflation, " + spawns.Length + " game objects, the character's path, CDN key check.");

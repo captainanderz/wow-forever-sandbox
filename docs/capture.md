@@ -57,11 +57,26 @@ and its git history know nothing of the captures.
   renderer build kept in `artifacts\viewer3d-objects` (the site's renderer plus `tools\viewer3d-objects\patch-viewer3d-objects.ps1`,
   which draws models at given world positions) and answers the objects' model files from the game's own storage
   (GameObjectDisplayInfo for the model, then its skins, textures, animations and skeleton).
+  **Server objects**, a button under Scene > layers (only on a map with captured objects), shows or hides them, to tell them
+  from the game files' own models; it starts on with every page. The renderer draws them only with the M2 layer on, and the
+  viewer starts with it off, so the page switches M2 on once when it has objects to show (turning it off again sticks), and
+  again whenever Server objects is switched on. They are drawn on every loaded terrain tile, not only within the M2 view
+  distance (at 1×1 an object a few yards past a tile edge would vanish). The page asks for the list again every 5 seconds: while
+  recording, the session's `gameobjects.json` is rewritten every few seconds, so new objects appear in an open 3D view.
 - Not drawn: objects whose model is a creature model with a skin from the creature tables (they would draw black), objects
   whose model is a WMO, and every object of a WMO-only map (a dungeon), whose coordinates the viewer's building does not
   share yet.
 - When the site's renderer changes, the kept build has to be made again from the new renderer tree with the patch, or the
   3D view may break (the 2D window does not depend on it).
+- Files the game build lists but never stored on disk (the game streams them while it plays; the crank wheels' textures drew
+  black without them) come from Blizzard's CDN (`GameCdn.cs`): the build's merged CDN index on disk gives archive and
+  offset, one ranged GET fetches the piece, and it must hash to its encoding key. Only files of captured objects' models are
+  fetched, once per map window run, kept in memory.
+- No service worker runs on the map window. The site's own one answers `/__viewer3d_missing_asset/...` (how this server
+  delivers the objects' model files) with its own 404, and keeps old copies of this tool's scripts. A browser that once got
+  the site's `sw.js` on localhost:5298 kept it (Edge keeps a worker whose script turns 404), so `/sw.js` here is a worker
+  that deletes this origin's caches, unregisters itself and reloads the pages the old one served. Tested in headless Edge:
+  old worker installed, model file 404; first load after it, no worker, 200, no caches; no reload loop on later loads.
 
 `ForeverCapture decode <capture folder>` reads a capture again, for example after a decoder fix.
 `ForeverCapture stop` stops a packet-monitor recording that was left running.

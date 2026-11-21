@@ -48,19 +48,15 @@ if (-not (Get-Content -LiteralPath $mapH -Raw).Contains('viewerServerObjects')) 
         }
         return uint32_t(viewerServerObjects.size());
     }
-    // Per frame, while Objects is on: adds the objects to the M2 candidates. On a terrain map only
-    // those on resident tiles within the M2 tile ring (so their files load like other scenery);
-    // a WMO-only scene has no tiles and takes them all.
+    // Per frame, while Objects is on: adds the objects to the M2 candidates. On a terrain map those
+    // on resident tiles, out to the terrain's view distance, not the M2 one: there are few of them,
+    // and with M2 at 1x1 one a few yards past a tile edge would vanish. A WMO-only scene has no
+    // tiles and takes them all.
     void viewerApplyObjects(const mathfu::vec4 &cameraPos, std::vector<std::shared_ptr<M2Object>> &m2, bool byTile) {
         auto config = m_api->getConfig();
         if (!config->viewerObjectsEnabled || !config->renderM2) return;
-        const int cameraI = worldCoordinateToAdtIndex(cameraPos.y), cameraJ = worldCoordinateToAdtIndex(cameraPos.x);
         for (auto &object : viewerServerObjects) {
-            if (byTile) {
-                if (object.i < 0 || object.i >= 64 || object.j < 0 || object.j >= 64 || mapTiles[object.i][object.j] == nullptr) continue;
-                const int distance = std::max(std::abs(object.i - cameraI), std::abs(object.j - cameraJ));
-                if (config->viewerM2TileRadius >= 0 && distance > config->viewerM2TileRadius) continue;
-            }
+            if (byTile && (object.i < 0 || object.i >= 64 || object.j < 0 || object.j >= 64 || mapTiles[object.i][object.j] == nullptr)) continue;
             m2.push_back(object.m2);
         }
     }

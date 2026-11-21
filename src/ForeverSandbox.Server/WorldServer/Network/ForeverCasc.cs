@@ -56,6 +56,13 @@ internal sealed class ForeverCasc : IDisposable
         return null;
     }
 
+    // A listed file's encoding keys: the game streams some files from the CDN instead of storing them, and those are fetched by key.
+    public List<byte[]> EncodingKeys(int fileDataId)
+    {
+        var i = Array.BinarySearch(rootIds, fileDataId);
+        return i < 0 ? new List<byte[]>() : EKeys(rootKeys.AsSpan(i * 16, 16));
+    }
+
     public void Dispose() { lock (gate) { foreach (var stream in archives.Values) stream.Dispose(); archives.Clear(); } }
 
     private string ConfigPath(string kind, string key) => System.IO.Path.Combine(dataDirectory, kind, key[..2], key[2..4], key);

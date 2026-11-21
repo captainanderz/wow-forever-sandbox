@@ -120,7 +120,13 @@ internal static class Program
                         liveTimer = new Timer(_ =>
                         {
                             if (Interlocked.Exchange(ref busy, 1) == 1) return;
-                            try { var (objects, track, _) = WorldDecoder.Decode(streams.Connections(), KeyData(session)); WriteLive(livePath, session, objects, track, true); }
+                            try
+                            {
+                                var (objects, track, _) = WorldDecoder.Decode(streams.Connections(), KeyData(session));
+                                WriteLive(livePath, session, objects, track, true);
+                                // The 3D view reads objects from the capture folders: this session's are there as they come.
+                                if (objects.Count > 0) WriteObjects(folder, session, objects);
+                            }
                             catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException) { }   // the next tick tries again
                             finally { busy = 0; }
                         }, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
@@ -226,12 +232,10 @@ internal static class Program
         }
         if (!File.Exists(capture)) throw new IOException("No world.fwcap or net.pcapng in " + folder);
         var (objects, track, stats) = WorldDecoder.Decode(WorldCapture.Read(capture), KeyData(session));
-        var output = Path.Combine(folder, "gameobjects.json");
-        var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals };
-        File.WriteAllText(output, JsonSerializer.Serialize(new { client = session.Client, capturedUtc = session.StartedUtc, objects }, json));
+        var output = WriteObjects(folder, session, objects);
         // The character's own path, to see afterwards where a capture has been. It is yours alone: keep it out of anything published.
         File.WriteAllText(Path.Combine(folder, "track.json"), JsonSerializer.Serialize(new { client = session.Client, capturedUtc = session.StartedUtc,
-            segments = track.Select(s => new { map = s.Map, points = s.Points.Select(p => p.Select(v => MathF.Round(v, 1)).ToArray()) }) }, json));
+            segments = track.Select(s => new { map = s.Map, points = s.Points.Select(p => p.Select(v => MathF.Round(v, 1)).ToArray()) }) }, CaptureJson));
         File.WriteAllText(Path.Combine(folder, "decode-stats.json"), JsonSerializer.Serialize(stats, Indented));
 
         Console.WriteLine($"World connections: {stats.Connections} recorded, {stats.Decrypted} decrypted, {stats.NoKey} without a key, {stats.Truncated} cut short.");
@@ -246,6 +250,18 @@ internal static class Program
     }
 
     private static string CaptureRoot => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ForeverCapture");
+
+    private static readonly JsonSerializerOptions CaptureJson = new()
+        { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowNamedFloatingPointLiterals };
+
+    // A capture's gameobjects.json, written whole and then swapped in: the map window may be reading it during a recording.
+    private static string WriteObjects(string folder, Session session, List<PlacedObject> objects)
+    {
+        var output = Path.Combine(folder, "gameobjects.json");
+        File.WriteAllText(output + ".tmp", JsonSerializer.Serialize(new { client = session.Client, capturedUtc = session.StartedUtc, objects }, CaptureJson));
+        File.Move(output + ".tmp", output, true);
+        return output;
+    }
 
     // The map window alone, with every capture so far, until Enter is pressed.
     private static int MapWindow(string[] args)

@@ -23,6 +23,7 @@ internal sealed class LocalMap : IDisposable
     private readonly string web, tiles, captures, wow, client, renderer;
     private readonly object gate = new();
     private ForeverCasc casc;
+    private GameCdn cdn;
     private ForeverDb2 displays;
     private JsonDocument versions;
     // Every file the objects' models load: the viewer asks for these as missing (its own export has none of them).
@@ -62,6 +63,19 @@ internal sealed class LocalMap : IDisposable
 
     public const string ObjectsProduct = "wow_classic_beta";
 
+    // Takes over from an old worker at once, deletes this origin's caches, unregisters and reloads the pages that worker
+    // served. A page it did not serve (the site's pages register /sw.js on every load) is left alone, so nothing loops.
+    internal const string RemoveServiceWorker = """
+        self.addEventListener('install', function () { self.skipWaiting(); });
+        self.addEventListener('activate', function (event) {
+            event.waitUntil(caches.keys()
+                .then(function (keys) { return Promise.all(keys.map(function (key) { return caches.delete(key); })); })
+                .then(function () { return self.registration.unregister(); })
+                .then(function () { return self.clients.matchAll({ type: 'window' }); })
+                .then(function (pages) { pages.forEach(function (page) { page.navigate(page.url); }); }));
+        });
+        """;
+
     private async Task Serve()
     {
         while (listener.IsListening)
@@ -81,8 +95,10 @@ internal sealed class LocalMap : IDisposable
             var path = Uri.UnescapeDataString(context.Request.Url!.AbsolutePath);
             if (context.Request.HttpMethod != "GET") { response.StatusCode = 405; return; }
             if (path == "/api/config") { Send(response, "application/json", Encoding.UTF8.GetBytes("{\"tileBaseUrl\":\"/tiles\"}"), false); return; }
-            // No service worker here: it would hand out stale copies of the live file.
-            if (path == "/sw.js" || path.StartsWith("/api/", StringComparison.Ordinal)) { response.StatusCode = 404; return; }
+            // No service worker here: the site's would answer the objects' model files with its own 404 and hand out stale copies
+            // of this tool's scripts and lists. A 404 for /sw.js does not remove one Edge registered earlier, so /sw.js removes itself.
+            if (path == "/sw.js") { Send(response, "text/javascript; charset=utf-8", Encoding.UTF8.GetBytes(RemoveServiceWorker), false); return; }
+            if (path.StartsWith("/api/", StringComparison.Ordinal)) { response.StatusCode = 404; return; }
             if (path is "/__local/live-map.js" or "/__local/objects-3d.js")
             {
                 using var stream = typeof(LocalMap).Assembly.GetManifestResourceStream(path == "/__local/live-map.js" ? "LiveMap.js" : "Objects3D.js")!;
@@ -101,7 +117,7 @@ internal sealed class LocalMap : IDisposable
             {
                 bool known;
                 lock (gate) known = objectFiles.Contains(fid);
-                var stored = known ? Game().TryOpenFile(fid) : null;
+                var stored = known ? GameFile(Game(), fid) : null;
                 if (stored == null) { response.StatusCode = 404; return; }
                 Send(response, "application/octet-stream", stored, false);
                 return;
@@ -184,9 +200,15 @@ internal sealed class LocalMap : IDisposable
             Console.WriteLine("Map window: opening the game's files for the objects' models...");
             casc = ForeverCasc.Open(wow, client, _ => null);
             displays = new ForeverDb2(casc.OpenFile(DisplayTable));
+            try { cdn = GameCdn.Open(wow, client, out var reason); if (cdn == null) Console.WriteLine($"Map window: {reason}; files the game streams instead of storing will be missing."); }
+            catch (Exception error) when (error is IOException or InvalidDataException or KeyNotFoundException or UnauthorizedAccessException)
+            { Console.WriteLine($"Map window: the build's CDN index could not be read ({error.Message}); files the game streams will be missing."); }
             return casc;
         }
     }
+
+    // A game file from the disk, else from the CDN for one the build lists but the game streams (textures drew black without).
+    private byte[] GameFile(ForeverCasc game, int fileDataId) => game.TryOpenFile(fileDataId) ?? (game.Has(fileDataId) ? cdn?.Fetch(game, fileDataId) : null);
 
     /// <summary>
     /// The captured objects of a map for the 3D viewer: rows of [model FileDataID, x, y, z, qx, qy, qz, qw, scale, id] in
@@ -220,7 +242,7 @@ internal sealed class LocalMap : IDisposable
         {
             if (models.TryGetValue(display, out var known)) return known;
             var model = displays.Get(display, DisplayModelField);
-            var bytes = model > 0 ? game.TryOpenFile(model) : null;
+            var bytes = model > 0 ? GameFile(game, model) : null;
             (int, int[])? result = null;
             if (bytes != null && M2Files(bytes, out var outside) is { } first && !outside)
             {
@@ -231,7 +253,7 @@ internal sealed class LocalMap : IDisposable
                 {
                     var id = queue.Dequeue();
                     if (!files.Add(id) || !game.Has(id)) continue;
-                    if (game.TryOpenFile(id) is { } more && Chunked(more)) foreach (var next in M2Files(more, out _)) queue.Enqueue(next);
+                    if (GameFile(game, id) is { } more && Chunked(more)) foreach (var next in M2Files(more, out _)) queue.Enqueue(next);
                 }
                 files.RemoveWhere(id => !game.Has(id));
                 result = (model, files.ToArray());
@@ -326,7 +348,8 @@ internal sealed class LocalMap : IDisposable
             if (!File.Exists(found)) continue;
             try
             {
-                using var document = JsonDocument.Parse(File.ReadAllBytes(found));
+                // A recording replaces its file while it may be read.
+                using var document = JsonDocument.Parse(ReadShared(found));
                 foreach (var o in document.RootElement.GetProperty("objects").EnumerateArray())
                 {
                     if (o.GetProperty("map").GetInt32() != mapId) continue;
@@ -337,7 +360,7 @@ internal sealed class LocalMap : IDisposable
                         new Placed3(o.GetProperty("display").GetInt32(), x, y, z, rotation, o.GetProperty("scale").GetDouble());
                 }
             }
-            catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException) { }   // a capture that cannot be read is left out
+            catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException or IOException) { }   // a capture that cannot be read is left out
         }
         return spots.Values.ToList();
     }
@@ -358,7 +381,7 @@ internal sealed class LocalMap : IDisposable
                 var found = Path.Combine(folder, "gameobjects.json");
                 if (File.Exists(found))
                 {
-                    using var document = JsonDocument.Parse(File.ReadAllBytes(found));
+                    using var document = JsonDocument.Parse(ReadShared(found));
                     foreach (var o in document.RootElement.GetProperty("objects").EnumerateArray())
                         if (o.GetProperty("map").GetInt32() == mapId) objects.Add((R(o.GetProperty("x")), R(o.GetProperty("y"))));
                 }
@@ -371,7 +394,7 @@ internal sealed class LocalMap : IDisposable
                             tracks.Add(segment.GetProperty("points").EnumerateArray().SelectMany(p => new[] { R(p[0]), R(p[1]) }).ToList());
                 }
             }
-            catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException) { }   // a capture that cannot be read is left out
+            catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException or IOException) { }   // a capture that cannot be read is left out
         }
         return JsonSerializer.SerializeToUtf8Bytes(new { schemaVersion = 1, generator = "coverage/1", mapId, objects = objects.Select(o => new[] { o.X, o.Y }), tracks });
     }
@@ -387,6 +410,6 @@ internal sealed class LocalMap : IDisposable
     public void Dispose()
     {
         try { listener.Close(); } catch (ObjectDisposedException) { }
-        lock (gate) { casc?.Dispose(); versions?.Dispose(); }
+        lock (gate) { casc?.Dispose(); cdn?.Dispose(); versions?.Dispose(); }
     }
 }

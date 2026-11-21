@@ -14,6 +14,7 @@
     <Compile Include="../../src/ForeverCapture/LoginRelay.cs" Link="Capture/LoginRelay.cs" />
     <Compile Include="../../src/ForeverCapture/LiveCapture.cs" Link="Capture/LiveCapture.cs" />
     <Compile Include="../../src/ForeverCapture/LocalMap.cs" Link="Capture/LocalMap.cs" />
+    <Compile Include="../../src/ForeverCapture/GameCdn.cs" Link="Capture/GameCdn.cs" />
     <!-- The same server sources tests\ForeverSandbox.Tests compiles in. -->
     <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldWire.cs" Link="Server/ForeverWorldWire.cs" />
     <Compile Include="../../src/ForeverSandbox.Server/WorldServer/Network/ForeverWorldCrypto.cs" Link="Server/ForeverWorldCrypto.cs" />
