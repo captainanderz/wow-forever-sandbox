@@ -64,7 +64,7 @@ var continued = new byte[80]; instanceLocal.CopyTo(continued, 8);
 
 var spawns = new[]
 {
-    new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(2991, 529161, 1), 529161, 31, 3295.6016f, 1910.125f, 837.5376f, 1.25f, ForeverGameObjects.Rotation(1.25f, 0.2f, -0.1f), 1.4f),
+    new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(2991, 529161, 1), 529161, 31, 3295.6016f, 1910.125f, 837.5376f, 1.25f, ForeverGameObjects.Rotation(1.25f, 0.2f, -0.1f), 1.4f, ParentRotation: (0f, 0.6f, 0f, 0.8f)),
     new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(2991, 710486, 0x12345), 710486, 31, -14297.2f, 530.9f, 8.8f, 3.1f, ForeverGameObjects.Rotation(3.1f), 1f, 0x20, 0),
     new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(2991, 457387, 77), 457387, 9001, 17.3646f, -82.4861f, 490.6032f, 2.927089f, ForeverGameObjects.Rotation(2.9f, -1.1f, 0.6f), 0.5f),
     new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(2991, 13965, 0xFFFFFFFFFF), 13965, 411, -100f, 250f, -30f, 0f, ForeverGameObjects.Rotation(0f), 2f),
@@ -153,7 +153,8 @@ void CheckObjects(IEnumerable<WorldConnection> connections, string how)
         // x, y and z come back to the packing's 2^-20 steps; w is rebuilt from them, so it is coarser near half turns.
         var off = o.Rotation.Zip(expected, (a, b) => MathF.Abs(a - b)).ToArray();
         Check(off[0] < 1e-5f && off[1] < 1e-5f && off[2] < 1e-5f && off[3] < 1e-3f, $"{how}: object {s.Entry} rotation differs");
-        Check(o.LayoutExact && o.ParentRotation.SequenceEqual(new[] { 0f, 0f, 0f, 1f }), $"{how}: object {s.Entry} values were not read to the end");
+        var parent = s.ParentRotation ?? (0f, 0f, 0f, 1f);
+        Check(o.LayoutExact && o.ParentRotation.SequenceEqual(new[] { parent.X, parent.Y, parent.Z, parent.W }), $"{how}: object {s.Entry} values were not read to the end");
     }
 }
 CheckObjects(new[] { realm, instance }, "streams");
@@ -286,6 +287,9 @@ finally { File.Delete(pcapPath); File.Delete(capturePath); }
         var placed = LocalMap.Placed(root, 2959);
         Check(placed.Count == 2 && placed.Single(p => p.X > 300).Scale == 1.5 && placed.All(p => p.Rotation.Length == 4 && p.Display == 8096),
             "the same object from two captures is one, the latest sighting");
+        var merged = LocalMap.Merged(root);
+        Check(merged.Count == 3 && merged.Count(o => o.GetProperty("map").GetInt32() == 0) == 1 && merged.Single(o => o.GetProperty("entry").GetInt32() == 1).GetProperty("scale").GetDouble() == 1.5,
+            "the merge for the sandbox is every map's objects once, as their captures wrote them");
 
         // An M2 with two skins, a texture of its own, an animation and a skeleton; a second one with a creature skin.
         static byte[] Chunk(string tag, byte[] body) => System.Text.Encoding.ASCII.GetBytes(tag).Concat(BitConverter.GetBytes(body.Length)).Concat(body).ToArray();

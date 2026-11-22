@@ -17,7 +17,8 @@ ForeverSandbox.exe     launcher
 sandbox.json           settings: clientRoot, realmKeyWrite, fullFogOff
 server\                the sandbox server (self-contained .NET 8)
 tools\                 ForeverSnapshot.exe, ForeverCertificates.exe
-sandbox-data\          characters.json, account-data.json, locations.json (the player's) and hotfixes.json (shipped)
+sandbox-data\          characters.json, account-data.json, locations.json (the player's), hotfixes.json (shipped) and
+                       gameobjects.json (objects captured from the live game, if merged: capture.md)
 certificates\          the local login certificates and what the launcher trusted
 state\run-<UTC>\       one folder per run: server logs, ready.json, diagnostics
 client\                the frozen 1.60.1.70888 client snapshot (made locally, never shared)

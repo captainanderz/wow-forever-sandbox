@@ -61,8 +61,11 @@ internal sealed class ForeverWorldPlayer
     // Closes the instance connection after logout (reference WorldSession::LogoutPlayer); set by the instance socket.
     public Action CloseInstance { get; set; }
 
-    // Sandbox game objects shown to this player (.gob, .walls).
+    // Sandbox game objects shown to this player (.gob, .walls, .gobs).
     public ForeverWorldObjects Objects { get; }
+
+    // The objects that follow the player: checked on every movement, teleport and login.
+    private void UpdateSurroundings() { ForeverImpassWalls.Update(this); ForeverCapturedObjects.Update(this); }
 
     // SMSG_UPDATE_OBJECT for sandbox game objects goes to the instance connection, like the player's own create block.
     public void SendObjects(IReadOnlyList<byte[]> createBlocks, IReadOnlyList<byte[]> outOfRange)
@@ -125,10 +128,10 @@ internal sealed class ForeverWorldPlayer
         if (Character.CanFly) SetCanFly(true);
         if (Character.SlowFall) SetSlowFall(true);
         SetSpeeds(SpeedMultiplier, FlightMultiplier);
-        ForeverImpassWalls.Update(this);
+        UpdateSurroundings();
         if (firstTime)
             RealmSend(ForeverChat.ChatOpcode, ForeverChat.SystemMessage((CanFly ? "Sandbox: flying is on - jump, then hold Space to climb." : "Sandbox: flying is off.")
-                + " Commands: .fly, .speed <n>, .flyspeed <n>, .tele, .loc, .blink, .slowfall, .fog, .walls, .gob, .help"));
+                + " Commands: .fly, .speed <n>, .flyspeed <n>, .tele, .loc, .blink, .slowfall, .fog, .walls, .gobs, .gob, .help"));
     }
     private bool hinted;
 
@@ -146,7 +149,7 @@ internal sealed class ForeverWorldPlayer
                 Character.X = target.X; Character.Y = target.Y; Character.Z = target.Z; Character.O = target.O;
                 if (target.Zone != 0) Character.Zone = target.Zone;
                 Save();
-                ForeverImpassWalls.Update(this);
+                UpdateSurroundings();
                 return $"Sandbox: teleported to {Describe(target)}.";
             }
             RealmSend(ForeverTeleportPackets.TransferPendingOpcode, ForeverTeleportPackets.TransferPending(target.Map, Character.X, Character.Y, Character.Z));
@@ -185,7 +188,7 @@ internal sealed class ForeverWorldPlayer
             instanceSend(ForeverLoginPackets.LoginSetTimeSpeedOpcode, ForeverLoginPackets.LoginSetTimeSpeed(DateTime.Now));
             instanceSend(ForeverPlayerObject.UpdateObjectOpcode, ForeverPlayerObject.CreateSelf(Character));
             Save();
-            ForeverImpassWalls.Update(this);
+            UpdateSurroundings();
             return true;
         }
     }
@@ -215,7 +218,7 @@ internal sealed class ForeverWorldPlayer
         if (!float.IsFinite(x) || !float.IsFinite(y) || !float.IsFinite(z) || !float.IsFinite(o) || Math.Abs(x) > 20000 || Math.Abs(y) > 20000 || Math.Abs(z) > 10000) return false;
         Character.X = x; Character.Y = y; Character.Z = z; Character.O = o;
         if (DateTime.UtcNow - lastSave > TimeSpan.FromSeconds(10)) Save();
-        ForeverImpassWalls.Update(this);
+        UpdateSurroundings();
         return true;
     }
 
@@ -327,6 +330,8 @@ internal static class ForeverChat
                 return ForeverImpassWalls.Command(parts, player);
             case "gob":
                 return GameObjectCommand(parts, player);
+            case "gobs":
+                return ForeverCapturedObjects.Command(parts, player);
             case "loc":
                 var c = player.Character;
                 var here = new ForeverLocation(parts.Length > 1 ? parts[1] : "", c.Map, c.X, c.Y, c.Z, c.O, c.Zone);
@@ -342,7 +347,7 @@ internal static class ForeverChat
                 return "Sandbox commands: .fly [on|off] - toggle flying; .speed <n> - run/swim/fly speed multiplier; .flyspeed <n> - flight-only multiplier; "
                     + ".tele <name> | .tele <x> <y> <z> [o] [map] - teleport; .loc [name] - show or save your position; .slowfall [on|off]; .fog off|on - remove all fog, or bring it back; "
                     + ".walls [on|off|overlay] - show impassable terrain walls (game objects, or the launcher overlay); .walls glass faint|light|medium|strong - wall tint; .walls look <yellow> <red> [scale] - force fields instead; "
-                    + ".gob <display> [scale] | .gob clear - try a game object model.";
+                    + ".gobs [on|off] - show the game objects captured from the live game; .gob <display> [scale] | .gob clear - try a game object model.";
             default:
                 return $"Sandbox: unknown command .{parts[0]} - try .help";
         }

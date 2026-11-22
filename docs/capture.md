@@ -79,7 +79,26 @@ and its git history know nothing of the captures.
   old worker installed, model file 404; first load after it, no worker, 200, no caches; no reload loop on later loads.
 
 `ForeverCapture decode <capture folder>` reads a capture again, for example after a decoder fix.
+`ForeverCapture merge <sandbox folder>` puts every capture's objects into a Forever Sandbox (next section).
 `ForeverCapture stop` stops a packet-monitor recording that was left running.
+
+## Into the sandbox
+
+```powershell
+.\artifacts\bin\ForeverCapture\release\ForeverCapture.exe merge "<Forever Sandbox folder>"
+```
+
+writes every capture's objects, each once (the map window's rule: the same entry at the same spot is one object, the latest
+sighting), to `sandbox-data\gameobjects.json` in that folder. Run it again after new captures. The file holds objects only:
+no keys, no path, nothing of the session.
+
+The sandbox server reads the file when it starts and shows the objects within 400 yards of the character, with their
+captured position, rotation (tilt and parent rotation included), scale and model (`ForeverCapturedObjects` in
+`ForeverGameObjects.cs`). `.gobs off` in the game chat hides them, `.gobs on` shows them again.
+
+- They are scenery: sent as generic, not selectable objects under the sandbox's own entry. They have no name, doors do not
+  open and nothing can be used or looted.
+- An object whose model is not in the sandbox's client build shows nothing.
 
 ## What is left on the PC
 

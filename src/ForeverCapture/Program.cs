@@ -4,6 +4,7 @@
 //                                                                                --map also opens the live map window
 //   ForeverCapture map --site <site folder> [--wow <WoW folder>] [--no-window]   the map window alone: every capture so far
 //   ForeverCapture decode <capture folder>                                       read a capture again (after a decoder fix)
+//   ForeverCapture merge <sandbox folder>                                        every capture's objects into a Forever Sandbox
 //   ForeverCapture stop                                                          stop a packet-monitor recording left running
 // The map window (LocalMap.cs) serves the WoW Atlas site's own pages read-only from its folder, with the captures drawn on
 // top, on this PC only: nothing of the captures goes into the site's folder, its exports or its uploads.
@@ -34,8 +35,9 @@ internal static class Program
                 case "decode" when args.Length == 2: DecodeFolder(Path.GetFullPath(args[1])); return 0;
                 case "check": return CheckSetup(args.Skip(1).ToArray());
                 case "map": return MapWindow(args.Skip(1).ToArray());
+                case "merge" when args.Length == 2: return Merge(Path.GetFullPath(args[1]));
                 case "stop": PacketMonitor.StopOnly(Path.GetTempPath()); Console.WriteLine("Packet monitor stopped."); return 0;
-                default: Console.WriteLine("ForeverCapture [record [--wow <WoW folder>] [--out <folder>] [--relay-only] [--all-ports] [--map <site folder>] | map --site <site folder> [--wow <WoW folder>] [--no-window] | check [--wow <WoW folder>] | decode <capture folder> | stop]"); return 2;
+                default: Console.WriteLine("ForeverCapture [record [--wow <WoW folder>] [--out <folder>] [--relay-only] [--all-ports] [--map <site folder>] | map --site <site folder> [--wow <WoW folder>] [--no-window] | check [--wow <WoW folder>] | decode <capture folder> | merge <sandbox folder> | stop]"); return 2;
             }
         }
         catch (Exception error) when (error is IOException or InvalidOperationException or UnauthorizedAccessException or InvalidDataException or JsonException
@@ -261,6 +263,21 @@ internal static class Program
         File.WriteAllText(output + ".tmp", JsonSerializer.Serialize(new { client = session.Client, capturedUtc = session.StartedUtc, objects }, CaptureJson));
         File.Move(output + ".tmp", output, true);
         return output;
+    }
+
+    // Every capture's objects, each once, into a Forever Sandbox folder: its server shows them in the game (ForeverGameObjects.cs).
+    private static int Merge(string sandbox)
+    {
+        var data = Path.Combine(sandbox, "sandbox-data");
+        if (!Directory.Exists(data)) throw new IOException($"No Forever Sandbox in {sandbox} (expected its sandbox-data folder).");
+        var objects = LocalMap.Merged(CaptureRoot);
+        var output = Path.Combine(data, "gameobjects.json");
+        File.WriteAllText(output + ".tmp", JsonSerializer.Serialize(new { mergedUtc = DateTime.UtcNow, objects }));
+        File.Move(output + ".tmp", output, true);
+        Console.WriteLine($"{objects.Count} objects from the captures in {CaptureRoot} written to {output}.");
+        foreach (var map in objects.GroupBy(o => o.GetProperty("map").GetInt32()).OrderByDescending(g => g.Count())) Console.WriteLine($"  map {map.Key}: {map.Count()}");
+        Console.WriteLine("The sandbox reads the file when it starts; .gobs off in the game chat hides the objects.");
+        return 0;
     }
 
     // The map window alone, with every capture so far, until Enter is pressed.

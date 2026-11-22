@@ -28,6 +28,7 @@ copies that exact build into a frozen local folder that Battle.net never updates
 | `.loc [name]` | show your position, or save it as a `.tele` name |
 | `.blink [yards]`, `.slowfall [on\|off]` | jump forward (default 20 yards), slow fall |
 | `.walls [on\|off\|overlay]`, `.walls glass faint\|light\|medium\|strong` | impassable terrain walls and their tint |
+| `.gobs [on\|off]` | game objects captured from the live game ([docs/capture.md](docs/capture.md)) |
 | `.gob <display> [scale]`, `.gob clear` | place a test game object model |
 | `.fog off\|on` | remove all fog / bring it back |
 

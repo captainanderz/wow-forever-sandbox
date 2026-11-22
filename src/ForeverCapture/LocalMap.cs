@@ -339,9 +339,14 @@ internal sealed class LocalMap : IDisposable
     /// one object, the latest capture's sighting. The server gives an object a new GUID after each restart, so the GUID
     /// cannot tell sightings apart.
     /// </summary>
-    internal static List<Placed3> Placed(string captureRoot, int mapId)
+    internal static List<Placed3> Placed(string captureRoot, int mapId) => Merged(captureRoot).Where(o => o.GetProperty("map").GetInt32() == mapId)
+        .Select(o => new Placed3(o.GetProperty("display").GetInt32(), o.GetProperty("x").GetDouble(), o.GetProperty("y").GetDouble(), o.GetProperty("z").GetDouble(),
+            o.GetProperty("rotation").EnumerateArray().Select(v => v.GetDouble()).ToArray(), o.GetProperty("scale").GetDouble())).ToList();
+
+    /// <summary>The same for every map, each object as its capture wrote it (the merge command writes these for the sandbox).</summary>
+    internal static List<JsonElement> Merged(string captureRoot)
     {
-        var spots = new Dictionary<(int, long, long, long), Placed3>();
+        var spots = new Dictionary<(int, int, long, long, long), JsonElement>();
         foreach (var folder in Directory.Exists(captureRoot) ? Directory.GetDirectories(captureRoot).OrderBy(f => f, StringComparer.Ordinal) : Enumerable.Empty<string>())
         {
             var found = Path.Combine(folder, "gameobjects.json");
@@ -352,12 +357,10 @@ internal sealed class LocalMap : IDisposable
                 using var document = JsonDocument.Parse(ReadShared(found));
                 foreach (var o in document.RootElement.GetProperty("objects").EnumerateArray())
                 {
-                    if (o.GetProperty("map").GetInt32() != mapId) continue;
                     double x = o.GetProperty("x").GetDouble(), y = o.GetProperty("y").GetDouble(), z = o.GetProperty("z").GetDouble();
-                    var rotation = o.GetProperty("rotation").EnumerateArray().Select(v => v.GetDouble()).ToArray();
-                    if (rotation.Length != 4) continue;
-                    spots[(o.GetProperty("entry").GetInt32(), (long)Math.Round(x * 100), (long)Math.Round(y * 100), (long)Math.Round(z * 100))] =
-                        new Placed3(o.GetProperty("display").GetInt32(), x, y, z, rotation, o.GetProperty("scale").GetDouble());
+                    if (o.GetProperty("rotation").EnumerateArray().Count(v => double.IsFinite(v.GetDouble())) != 4) continue;
+                    _ = (o.GetProperty("display").GetInt32(), o.GetProperty("scale").GetDouble());   // every reader needs them
+                    spots[(o.GetProperty("map").GetInt32(), o.GetProperty("entry").GetInt32(), (long)Math.Round(x * 100), (long)Math.Round(y * 100), (long)Math.Round(z * 100))] = o.Clone();
                 }
             }
             catch (Exception error) when (error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException or IOException) { }   // a capture that cannot be read is left out

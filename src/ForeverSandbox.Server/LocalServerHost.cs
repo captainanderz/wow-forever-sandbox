@@ -77,6 +77,8 @@ internal static class LocalServerHost
             if (characterStore != null) ForeverLocations.Current = new ForeverLocations(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(characterStore)), "locations.json"));
             // .fog marker for the launcher (Fog.cs), also next to the characters.
             if (characterStore != null) ForeverChat.FogMarkerPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(characterStore)), "fog-off");
+            // Game objects captured from the live game (ForeverCapture merge), also next to the characters.
+            if (characterStore != null) ForeverCapturedObjects.Load(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(characterStore)), "gameobjects.json"));
             var hotfixData = options.GetValueOrDefault("--hotfix-data");
             if (hotfixData != null) ForeverHotfixStore.Current = ForeverHotfixStore.Load(Path.GetFullPath(hotfixData));
             // GameObjectDisplayInfo rows for the .walls models (ForeverImpass.cs).

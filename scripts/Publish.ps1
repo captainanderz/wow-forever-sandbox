@@ -65,6 +65,8 @@ Walls:     .walls in the game chat shows impassable terrain (the map's impass fl
            translucent yellow/red wall models (added to client\ by ForeverSnapshot walls install; walls remove undoes it),
            .walls glass faint|light|medium|strong changes their tint, .walls look <yellow> <red> uses game force fields
            instead, .walls overlay draws them over the game window, .walls off hides them.
+Objects:   game objects captured from the live game (ForeverCapture merge "<this folder>" writes sandbox-data\gameobjects.json)
+           stand in the world as scenery; .gobs off in the game chat hides them, .gobs on shows them again.
 Never share client\ - it holds Blizzard's game files.
 "@ | Set-Content -LiteralPath (Join-Path $root 'README.txt')
 Remove-Item -LiteralPath $staging -Recurse -Force

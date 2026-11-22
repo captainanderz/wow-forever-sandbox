@@ -370,7 +370,9 @@ internal static class WorldFixtures
         run("client_install_terrain_and_fog_rows_when_present",()=>{
             // Real local client files (skipped when absent): the Battle.net install and a frozen snapshot (FOREVER_SANDBOX_CLIENT,
             // set by scripts/Test.ps1 -Client). Storage, decryption keys, Map table, heights, an encrypted-capable client table.
-            var installs=new List<string>{@"C:\Blizzard Games\World of Warcraft"};
+            // Battle.net keeps updating its install: it is checked only while it still holds this build.
+            var installs=new List<string>();const string live=@"C:\Blizzard Games\World of Warcraft";
+            if(File.Exists(Path.Combine(live,".build.info")) && File.ReadAllText(Path.Combine(live,".build.info")).Contains(BgsRealmV2.ClientVersion))installs.Add(live);
             if(Environment.GetEnvironmentVariable("FOREVER_SANDBOX_CLIENT") is {Length:>0} snapshot)installs.Add(snapshot);
             foreach(var install in installs.Where(i=>File.Exists(Path.Combine(i,".build.info"))))CheckClientInstall(install);
         });
@@ -413,6 +415,34 @@ internal static class WorldFixtures
                 && rows.Select(r=>r.RecordId).SequenceEqual(Enumerable.Range(900001,rows.Count)) && rows.Select(r=>r.Unique).Distinct().Count()==rows.Count
                 && BinaryPrimitives.ReadInt32LittleEndian(rows[2].Data.AsSpan(24))==ForeverWallModels.ModelFile(0,false)
                 && BinaryPrimitives.ReadInt32LittleEndian(rows[^1].Data.AsSpan(24))==ForeverWallModels.ModelFile(ForeverWallModels.Tints.Length-1,true),"Wall display hotfix rows wrong.");
+        });
+        run("captured_objects_follow_the_player",()=>{
+            // ForeverCapture merge's file (a capture's own format): the objects near the player are created with their captured
+            // rotations, and swapped as the player moves on; .gobs hides and shows them.
+            var file=Path.Combine(Path.GetTempPath(),"forever-sandbox-gobs-"+Guid.NewGuid().ToString("N")+".json");
+            static string Obj(int map,int display,int x)=>"{\"guid\":\"00\",\"map\":"+map+",\"entry\":7,\"display\":"+display+",\"type\":0,\"state\":1,\"flags\":0,\"x\":"+x+",\"y\":20,\"z\":30,\"facing\":0.5,\"rotation\":[0.25,0,0.5,0.8291562],\"parentRotation\":[0,0,0.5,0.8660254],\"scale\":1.5,\"artKit\":0,\"layoutExact\":true}";
+            File.WriteAllText(file,"{\"objects\":["+Obj(1,31,10)+","+Obj(1,32,2010)+","+Obj(0,33,10)+","+Obj(1,0,10)+"]}");
+            try{
+                Check(ForeverCapturedObjects.Load(file)==3,"Captured objects not loaded, or one without a model kept.");
+                var sent=new List<(uint op,byte[] payload)>();
+                var player=new ForeverWorldPlayer(new ForeverCharacter{Counter=1,Map=1,X=50,Y=50},(op,p)=>sent.Add((op,p)),(_,_)=>{});
+                ForeverCapturedObjects.Update(player);ForeverCapturedObjects.Update(player);
+                var expected=ForeverGameObjects.Packets(1,new List<byte[]>{ForeverGameObjects.CreateBlock(new ForeverGameObjects.Spawn(ForeverGameObjects.Guid(1,ForeverWorldObjects.Entry,1),ForeverWorldObjects.Entry,31,10f,20f,30f,0.5f,(0.25f,0f,0.5f,0.8291562f),1.5f,ParentRotation:(0f,0f,0.5f,0.8660254f)))},new List<byte[]>()).Single();
+                Check(sent.Count==1 && sent[0].op==ForeverPlayerObject.UpdateObjectOpcode && sent[0].payload.SequenceEqual(expected),"The near captured object was not created once, as captured.");
+                player.Character.X=2050;ForeverCapturedObjects.Update(player);
+                Check(sent.Count==2 && BinaryPrimitives.ReadUInt32LittleEndian(sent[1].payload.AsSpan(2))==1 && sent[1].payload[6]==0xC0 && BinaryPrimitives.ReadUInt32LittleEndian(sent[1].payload.AsSpan(9))==1,"Moving on did not swap the near object for the far one.");
+                Check(ForeverChat.HandleCommand(".gobs off",player).Contains("off") && sent.Count==3 && ForeverChat.HandleCommand(".gobs",player).Contains("2 on this map, 3 in all") && sent.Count==4
+                    && ForeverChat.HandleCommand(".gobs x",player).Contains("usage") && sent.Count==4,"The .gobs command did not hide and show the captured objects.");
+            }finally{ForeverCapturedObjects.Load(file+".none");File.Delete(file);}
+            var nobody=new ForeverWorldPlayer(new ForeverCharacter{Counter=1},(_,_)=>throw new Exception("Objects sent without a file."),(_,_)=>{});
+            ForeverCapturedObjects.Update(nobody);
+            Check(ForeverChat.HandleCommand(".gobs on",nobody).Contains("no captured objects"),"Without a file .gobs must say so.");
+            // The merged file of the sandbox whose snapshot is under test (scripts/Test.ps1 -Client), when present: every object is usable.
+            if(Environment.GetEnvironmentVariable("FOREVER_SANDBOX_CLIENT") is {Length:>0} client && Path.Combine(client,"..","sandbox-data","gameobjects.json") is var real && File.Exists(real)){
+                using var document=System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(real));var listed=document.RootElement.GetProperty("objects").GetArrayLength();
+                try{var usable=ForeverCapturedObjects.Load(real);Check(usable==listed && listed>0,$"The server uses {usable} of the {listed} objects in {real}.");}
+                finally{ForeverCapturedObjects.Load(real+".none");}
+            }
         });
         run("ed25519ctx_rfc8032_section_7_2_vectors",()=>{
             foreach(var (seed,publicKey,message,context,signature) in new[]{

@@ -1,6 +1,6 @@
 # Builds and runs the protocol and data tests (tests\ForeverSandbox.Tests); results go to artifacts\test-results.json.
 # -Client <folder> also checks a frozen client snapshot (terrain, client tables, impassable walls); the Battle.net install at
-# C:\Blizzard Games\World of Warcraft is checked when present. Close the game first: a running client locks its storage.
+# C:\Blizzard Games\World of Warcraft is checked while it still holds this build. Close the game first: a running client locks its storage.
 param([string]$Client, [switch]$UpdateLock)
 . (Join-Path $PSScriptRoot 'Common.ps1')
 $project = Join-Path $RepoRoot 'tests/ForeverSandbox.Tests/ForeverSandbox.Tests.csproj'
