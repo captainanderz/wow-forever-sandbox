@@ -1,4 +1,4 @@
-// Independent 70338 hotfix and account-data glue support. The character list stays
+// Independent 70888 hotfix and account-data glue support. The character list stays
 // "waiting on startup prerequisites" (client General.log: hotfixes, TACT encryption,
 // account settings) until these arrive. Factual layouts: pinned 5a125dfe
 // HotfixPackets.cpp, HotfixHandler.cpp, ClientConfigPackets.cpp, MiscHandler.cpp.
@@ -123,8 +123,8 @@ internal sealed class ForeverHotfixStore
 // Account-wide UI data (bindings, settings) kept per type; optionally persisted.
 internal sealed class ForeverAccountData
 {
-    public const uint AccountDataTimesOpcode = 0x4701B6, UpdateAccountDataOpcode = 0x4701B4, UpdateCompleteOpcode = 0x4701B5;
-    public const uint RequestOpcode = 0x4400C3, UpdateOpcode = 0x4400C4;
+    public const uint AccountDataTimesOpcode = 0x4701B7, UpdateAccountDataOpcode = 0x4701B5, UpdateCompleteOpcode = 0x4701B6;
+    public const uint RequestOpcode = 0x4400C5, UpdateOpcode = 0x4400C6;
     public const int TypeCount = 20, MaxBytes = 1 << 20;   // 70338: 20 timestamps (reference ClassicOpcodes note)
     // Account-wide and per-character types (pinned WorldSession.h GLOBAL_CACHE_MASK / PER_CHARACTER_CACHE_MASK).
     public const uint GlobalMask = 0x000BA515, PerCharacterMask = 0x00045AEA;

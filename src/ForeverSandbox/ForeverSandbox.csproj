@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Forever Sandbox launcher: starts the sandbox server and the frozen 70338 client, keeps the local login certificates valid,
+  <!-- Forever Sandbox launcher: starts the sandbox server and the frozen 70888 client, keeps the local login certificates valid,
        and (opt-in) applies the realm-key write the world connection needs. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>

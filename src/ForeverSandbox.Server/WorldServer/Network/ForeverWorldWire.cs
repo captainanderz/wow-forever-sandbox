@@ -1,4 +1,4 @@
-// Independent 70338 pre-encryption world framing and authentication shape.
+// Independent 70888 pre-encryption world framing and authentication shape.
 // Contract: pinned ClassicOpcodes, WorldSocket and AuthenticationPackets references.
 using System;
 using System.Buffers.Binary;

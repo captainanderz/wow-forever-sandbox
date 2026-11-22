@@ -1,11 +1,11 @@
 # Forever Sandbox
 
-A local, single-player sandbox for the **World of Warcraft "Forever" beta client, build 1.60.1.70338**. It is a standalone
+A local, single-player sandbox for the **World of Warcraft "Forever" client, build 1.60.1.70888**. It is a standalone
 server plus a launcher that starts your own copy of that client against it. Everything runs on your machine, and nothing
 talks to Blizzard's game servers.
 
 **Not affiliated with or endorsed by Blizzard Entertainment.** World of Warcraft is a trademark of Blizzard Entertainment, Inc.
-This repository contains no Blizzard client files. You bring your own Battle.net install of the beta, and the snapshot tool
+This repository contains no Blizzard client files. You bring your own Battle.net install of the game, and the snapshot tool
 copies that exact build into a frozen local folder that Battle.net never updates.
 
 ## Features
@@ -34,7 +34,7 @@ copies that exact build into a frozen local folder that Battle.net never updates
 ## Requirements
 
 - Windows 10/11 x64.
-- The Battle.net install of the WoW Forever beta at exactly **1.60.1.70338**. The launcher checks the executables' hashes.
+- The Battle.net install of WoW Forever at exactly **1.60.1.70888**. The launcher checks the executables' hashes.
 - To build: .NET SDK 8.0.301 (pinned in `global.json`). The published product is self-contained.
 
 ## Getting started
@@ -78,7 +78,7 @@ references.
 ```text
 src/
   ForeverSandbox/            launcher (ForeverSandbox.exe): certificates, server and client start, realm key, fog, wall overlay
-  ForeverSandbox.Server/     server: Battle.net login, realm list, 1.60.1.70338 world protocol (WorldServer/Network/Forever*.cs)
+  ForeverSandbox.Server/     server: Battle.net login, realm list, 1.60.1.70888 world protocol (WorldServer/Network/Forever*.cs)
   ForeverSandbox.Framework/  shared protocol, crypto and Battle.net protobuf types
   ForeverSnapshot/           client snapshot tool and the wall-model installer
   ForeverCertificates/       local loopback certificate tool

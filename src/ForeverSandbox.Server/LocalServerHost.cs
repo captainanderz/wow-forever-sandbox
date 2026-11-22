@@ -1,4 +1,4 @@
-// Forever Sandbox server entry point: local Battle.net login (BGS and REST over loopback TLS) and the WoW Forever 1.60.1.70338
+// Forever Sandbox server entry point: local Battle.net login (BGS and REST over loopback TLS) and the WoW Forever 1.60.1.70888
 // world session, with the sandbox's state directory, data files and client install given on the command line.
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ internal static class LocalServerHost
         {
             if (args.Contains("--help"))
             {
-                Console.WriteLine("Forever Sandbox server for WoW Forever beta 1.60.1.70338 (started by ForeverSandbox.exe).");
+                Console.WriteLine("Forever Sandbox server for WoW Forever " + BgsRealmV2.ClientVersion + " (started by ForeverSandbox.exe).");
                 Console.WriteLine("--state-directory PATH --auth-port 8000 --rest-port 8001 --realm-port 8085 --instance-port 3724 --run-for-seconds 0");
                 Console.WriteLine("Optional: --certificate-thumbprint CURRENTUSER_MY_THUMBPRINT --hostname localhost --diagnostic-events 128");
                 return;
@@ -75,6 +75,8 @@ internal static class LocalServerHost
             if (characterStore != null) ForeverCharacterStore.Current = new ForeverCharacterStore(Path.GetFullPath(characterStore));
             // Saved .loc teleport spots live next to the characters.
             if (characterStore != null) ForeverLocations.Current = new ForeverLocations(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(characterStore)), "locations.json"));
+            // .fog marker for the launcher (Fog.cs), also next to the characters.
+            if (characterStore != null) ForeverChat.FogMarkerPath = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(characterStore)), "fog-off");
             var hotfixData = options.GetValueOrDefault("--hotfix-data");
             if (hotfixData != null) ForeverHotfixStore.Current = ForeverHotfixStore.Load(Path.GetFullPath(hotfixData));
             // GameObjectDisplayInfo rows for the .walls models (ForeverImpass.cs).
@@ -83,7 +85,7 @@ internal static class LocalServerHost
             var clientInstall = options.GetValueOrDefault("--client-install");
             if (clientInstall != null) ForeverWallModels.Installed = ForeverWallModels.InstalledIn(Path.GetFullPath(clientInstall));
             if (clientInstall != null)
-                ForeverTerrain.StartLoading(Path.GetFullPath(clientInstall), "1.60.1.70338", id => ForeverHotfixStore.Current.RecordData(ForeverHotfixStore.TactKeyTable, id));
+                ForeverTerrain.StartLoading(Path.GetFullPath(clientInstall), BgsRealmV2.ClientVersion, id => ForeverHotfixStore.Current.RecordData(ForeverHotfixStore.TactKeyTable, id));
             var accountData = options.GetValueOrDefault("--account-data");
             if (accountData != null) ForeverAccountData.Current = new ForeverAccountData(Path.GetFullPath(accountData));
             var diagnosticPath = Path.Combine(stateDirectory, "auth-diagnostics.ndjson");
@@ -94,7 +96,7 @@ internal static class LocalServerHost
 
             AuthConfig.ReadConfig();
             AuthConfig.BindPort = authPort;
-            Helper.PrintHeader("the sandbox server (WoW Forever beta 1.60.1.70338)");
+            Helper.PrintHeader("the sandbox server (WoW Forever " + BgsRealmV2.ClientVersion + ")");
             // Initialize handlers and resources before admitting clients.
             PacketManager.Initialize();
             global::AuthServer.Managers.Manager.Initialize();
@@ -140,7 +142,7 @@ internal static class LocalServerHost
                 restPort = Sandbox.RestPort,
                 realmPort = Sandbox.RealmPort,
                 instancePort = Sandbox.InstancePort,
-                worldProtocol = worldMode switch { 1 => "Forever70338HandshakeProbe", 2 => "Forever70338Session", _ => "legacy" },
+                worldProtocol = worldMode switch { 1 => "Forever70888HandshakeProbe", 2 => "Forever70888Session", _ => "legacy" },
                 worldEncryptDelayMilliseconds = worldMode == 2 ? ForeverWorldHandshake.EncryptDelayMilliseconds : (int?)null
             };
             var readyTemp = readyFile + ".tmp";

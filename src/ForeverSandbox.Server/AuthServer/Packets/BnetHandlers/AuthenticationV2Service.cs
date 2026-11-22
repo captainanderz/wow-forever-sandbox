@@ -27,7 +27,7 @@ internal static class AuthenticationV2Service
                     var request = BgsAuthenticationV2.ReadLogon(payload);
                     global::AuthServer.LocalAuthDiagnostics.Emit("bgs_v2_logon", new { connection = session.DiagnosticConnectionId,
                         titleId = request.TitleId, applicationVersion = request.Build, platform = request.Platform, locale = request.Locale });
-                    if (request.TitleId != BgsAuthenticationV2.WowTitleId || request.Build != 70338) { session.SendReply(Array.Empty<byte>(), 3); return; }
+                    if (request.TitleId != BgsAuthenticationV2.WowTitleId || request.Build != BgsRealmV2.ClientBuild) { session.SendReply(Array.Empty<byte>(), 3); return; }
                     session.ClientBuild = request.Build;
                     if (IsDemo(request.AuthToken)) { Complete(session); return; }
                     // A foreign cached token never grants access to the local demo.

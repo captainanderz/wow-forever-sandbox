@@ -1,4 +1,4 @@
-// Forever 70338 realm-socket handler. Probe mode (1) measures one auth session and
+// Forever 70888 realm-socket handler. Probe mode (1) measures one auth session and
 // closes. Session mode (2) derives keys from the realm join, sends the signed
 // EnterEncryptedMode, enables AES-GCM after the client's ACK and answers glue-screen
 // requests; PLAYER_LOGIN hands over to the instance socket (ForeverWorldEntry.cs). Logs contain metadata only, never keys/tickets.
@@ -41,7 +41,7 @@ internal sealed class ForeverWorldHandshake
             using var stream = new NetworkStream(socket, true);
             stream.Write(Encoding.ASCII.GetBytes(ForeverWorldWire.ServerInitializer));
             if (ForeverWorldWire.ReadInitializer(stream) != ForeverWorldWire.ClientInitializer) throw new FormatException("Unexpected world initializer.");
-            Emit("world_initializer", new { connection, profile = "Forever70338", accepted = true });
+            Emit("world_initializer", new { connection, profile = "Forever70888", accepted = true });
             var serverChallenge = RandomNumberGenerator.GetBytes(32);
             var challenge = new byte[65]; RandomNumberGenerator.Fill(challenge.AsSpan(0, 32)); serverChallenge.CopyTo(challenge, 32); challenge[64] = 1;
             stream.Write(ForeverWorldWire.Seal(crypt, ForeverWorldWire.AuthChallengeOpcode, challenge));

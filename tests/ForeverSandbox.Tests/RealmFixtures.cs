@@ -22,7 +22,7 @@ internal static class RealmFixtures
         ("Param_Identity",Blob(Encoding.UTF8.GetBytes("JSONRealmListTicketIdentity:"+JsonSerializer.Serialize(new{gameAccountID=identity,gameAccountRegion=2})))),
         ("Param_ClientInfo",Blob(Encoding.UTF8.GetBytes("JSONRealmListTicketClientInformation:"+JsonSerializer.Serialize(new{info=new{
             secret=base64?(object)Convert.ToBase64String(Enumerable.Range(0,32).Select(i=>(byte)i).ToArray()):Enumerable.Range(0,32).ToArray(),
-            version=new{versionBuild=70338},platformType=0x57696E,clientArch=0x783634,type=0x576F57}})))));
+            version=new{versionBuild=BgsRealmV2.ClientBuild},platformType=0x57696E,clientArch=0x783634,type=0x576F57}})))));
     public sealed class Result { public int Kind; public byte[] Blob; public string Text; public long Signed; }
     // Fixture decoder uses pinned v2 tags explicitly, independent of the SUT decoder.
     public static Dictionary<string,Result> Read(byte[] payload){
@@ -46,7 +46,7 @@ internal static class RealmFixtures
         var values=Read(payload);using var realms=Json(values["Param_RealmList"].Blob,"JSONRealmListUpdates");
         var update=realms.RootElement.GetProperty("updates")[0];var entry=update.GetProperty("update");
         Check(!update.GetProperty("deleting").GetBoolean() && entry.GetProperty("wowRealmAddress").GetUInt32()==0x46010046 && entry.GetProperty("cfgRealmsID").GetInt32()==70,"Realm identity/address incorrect.");
-        var version=entry.GetProperty("version");Check(version.GetProperty("versionMajor").GetInt32()==1 && version.GetProperty("versionMinor").GetInt32()==60 && version.GetProperty("versionRevision").GetInt32()==1 && version.GetProperty("versionBuild").GetInt32()==70338,"Wrong beta version.");
+        var version=entry.GetProperty("version");Check(version.GetProperty("versionMajor").GetInt32()==1 && version.GetProperty("versionMinor").GetInt32()==60 && version.GetProperty("versionRevision").GetInt32()==1 && version.GetProperty("versionBuild").GetUInt32()==BgsRealmV2.ClientBuild,"Wrong beta version.");
         Check(entry.GetProperty("cfgContentSetID").GetInt32()==137 && entry.GetProperty("superDistrictID").GetInt32()==2 && entry.GetProperty("flags").GetInt32()==0,"Realm ruleset/flags incorrect.");
         using var counts=Json(values["Param_CharacterCountList"].Blob,"JSONRealmCharacterCountList");Check(counts.RootElement.GetProperty("counts")[0].GetProperty("count").GetInt32()==0,"Unexpected local character count.");
     }

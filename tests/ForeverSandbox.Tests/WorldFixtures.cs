@@ -44,43 +44,43 @@ internal static class WorldFixtures
         Check(Ed25519Ctx.Verify(Hex("02596F0D0C061A8B30745988FD72C59E29EC367FB0F341F28E0F08D037BAFC69"),ForeverWorldKeys.SignedDigest(encrypt,true),enter.Payload[4..68],ForeverWorldKeys.EnableEncryptionContext),"Server did not sign the client-derived encryption key.");
         stream.Write(crypt.Seal(0x460005,Array.Empty<byte>()));crypt.Enable(encrypt);
         var response=crypt.Read(stream);Check(response.Opcode==0x470001 && response.Payload.Take(5).SequenceEqual(new byte[]{0,0,0,0,0x80}),"Encrypted AuthResponse (server counter 2) wrong.");
-        Check(crypt.Read(stream).Opcode==0x470124 && crypt.Read(stream).Opcode==0x470064,"Glue follow-up packets missing.");
+        Check(crypt.Read(stream).Opcode==0x470125 && crypt.Read(stream).Opcode==0x470064,"Glue follow-up packets missing.");
         var available=crypt.Read(stream);Check(available.Opcode==0x4B0001 && BinaryPrimitives.ReadUInt32LittleEndian(available.Payload)==BgsRealmV2.RealmAddress && BinaryPrimitives.ReadUInt32LittleEndian(available.Payload.AsSpan(4))*8+8==available.Payload.Length,"Available hotfixes missing.");
-        var times=crypt.Read(stream);Check(times.Opcode==0x4701B6 && times.Payload.Length==2+8+20*8,"Account data times wrong.");
-        var status=crypt.Read(stream);Check(status.Opcode==0x4702B2 && status.Payload.SequenceEqual(new byte[]{0x40}),"Battle.net connection status missing.");
-        for(var i=0;i<2;i++){var subscribed=crypt.Read(stream);Check(subscribed.Opcode==0x4702B0 && BinaryPrimitives.ReadUInt32LittleEndian(subscribed.Payload)==0,"Friends/block-list subscribe results missing.");}
+        var times=crypt.Read(stream);Check(times.Opcode==0x4701B7 && times.Payload.Length==2+8+20*8,"Account data times wrong.");
+        var status=crypt.Read(stream);Check(status.Opcode==0x4702B3 && status.Payload.SequenceEqual(new byte[]{0x40}),"Battle.net connection status missing.");
+        for(var i=0;i<2;i++){var subscribed=crypt.Read(stream);Check(subscribed.Opcode==0x4702B1 && BinaryPrimitives.ReadUInt32LittleEndian(subscribed.Payload)==0,"Friends/block-list subscribe results missing.");}
         stream.Write(crypt.Seal(0x440014,Array.Empty<byte>()));
         var list=crypt.Read(stream);Check(list.Opcode==0x470018 && list.Payload[0]==0x80,"Encrypted empty character list wrong.");
-        Check(crypt.Read(stream).Opcode==0x470363,"Character list release packet missing.");
+        Check(crypt.Read(stream).Opcode==0x470364,"Character list release packet missing.");
         // Battle.net over the world socket: character create's realm request (filter -1), a change-realm ticket, and the Ruleset button's list.
         byte[] Relay(uint token,byte[] body)=>BitConverter.GetBytes((0x5DBB51C2UL<<32)|1).Concat(BitConverter.GetBytes(0UL)).Concat(BitConverter.GetBytes(token)).Concat(BitConverter.GetBytes((uint)body.Length)).Concat(body).ToArray();
-        stream.Write(crypt.Seal(0x440124,Relay(77,RealmFixtures.Task("Command_LastCharPlayedRequest_v1_b9",("Param_ContentSetIDFilter",RealmFixtures.Signed(-1))))));
+        stream.Write(crypt.Seal(0x440126,Relay(77,RealmFixtures.Task("Command_LastCharPlayedRequest_v1_b9",("Param_ContentSetIDFilter",RealmFixtures.Signed(-1))))));
         var relayed=crypt.Read(stream);
-        Check(relayed.Opcode==0x4702B0 && BinaryPrimitives.ReadUInt32LittleEndian(relayed.Payload)==0 && BinaryPrimitives.ReadUInt64LittleEndian(relayed.Payload.AsSpan(4))==((0x5DBB51C2UL<<32)|1) && BinaryPrimitives.ReadUInt32LittleEndian(relayed.Payload.AsSpan(20))==77,"Relayed realm response status/method/token wrong.");
+        Check(relayed.Opcode==0x4702B1 && BinaryPrimitives.ReadUInt32LittleEndian(relayed.Payload)==0 && BinaryPrimitives.ReadUInt64LittleEndian(relayed.Payload.AsSpan(4))==((0x5DBB51C2UL<<32)|1) && BinaryPrimitives.ReadUInt32LittleEndian(relayed.Payload.AsSpan(20))==77,"Relayed realm response status/method/token wrong.");
         Check(RealmFixtures.Read(relayed.Payload[28..]).ContainsKey("Param_RealmEntry"),"Filter -1 realm entry missing.");
-        stream.Write(crypt.Seal(0x440129,BitConverter.GetBytes(5u).Concat(Range(0,32)).ToArray()));
-        var ticket=crypt.Read(stream);Check(ticket.Opcode==0x4702B3 && BinaryPrimitives.ReadUInt32LittleEndian(ticket.Payload)==5 && ticket.Payload[4]==0x80 && BinaryPrimitives.ReadUInt32LittleEndian(ticket.Payload.AsSpan(5))==27,"Change-realm-ticket response wrong.");
-        stream.Write(crypt.Seal(0x440124,Relay(78,RealmFixtures.Attributes(new[]{("Command_RealmListRequest_v1_b9",RealmFixtures.String("70-1-70"))}))));
-        var realms=crypt.Read(stream);Check(realms.Opcode==0x4702B0 && BinaryPrimitives.ReadUInt32LittleEndian(realms.Payload)==0,"Relayed realm list failed.");RealmFixtures.CheckList(realms.Payload[28..]);
+        stream.Write(crypt.Seal(0x44012B,BitConverter.GetBytes(5u).Concat(Range(0,32)).ToArray()));
+        var ticket=crypt.Read(stream);Check(ticket.Opcode==0x4702B4 && BinaryPrimitives.ReadUInt32LittleEndian(ticket.Payload)==5 && ticket.Payload[4]==0x80 && BinaryPrimitives.ReadUInt32LittleEndian(ticket.Payload.AsSpan(5))==27,"Change-realm-ticket response wrong.");
+        stream.Write(crypt.Seal(0x440126,Relay(78,RealmFixtures.Attributes(new[]{("Command_RealmListRequest_v1_b9",RealmFixtures.String("70-1-70"))}))));
+        var realms=crypt.Read(stream);Check(realms.Opcode==0x4702B1 && BinaryPrimitives.ReadUInt32LittleEndian(realms.Payload)==0,"Relayed realm list failed.");RealmFixtures.CheckList(realms.Payload[28..]);
         // Startup prerequisites: hotfix push request, TactKey DB query, account data load.
         if(BinaryPrimitives.ReadUInt32LittleEndian(available.Payload.AsSpan(4))>0){
             var push=BinaryPrimitives.ReadInt32LittleEndian(available.Payload.AsSpan(8));
-            stream.Write(crypt.Seal(0x440011,new uint[]{70338,70338,1}.SelectMany(BitConverter.GetBytes).Concat(BitConverter.GetBytes(push)).ToArray()));
+            stream.Write(crypt.Seal(0x440011,new uint[]{BgsRealmV2.ClientBuild,BgsRealmV2.ClientBuild,1}.SelectMany(BitConverter.GetBytes).Concat(BitConverter.GetBytes(push)).ToArray()));
             var hotfix=crypt.Read(stream);Check(hotfix.Opcode==0x4B0003 && BinaryPrimitives.ReadUInt32LittleEndian(hotfix.Payload)>=1 && BinaryPrimitives.ReadInt32LittleEndian(hotfix.Payload.AsSpan(4))==push,"Hotfix connect wrong.");
         }
         stream.Write(crypt.Seal(0x440010,BitConverter.GetBytes(0xDF2F53CFu).Concat(new byte[]{0x00,0x08}).Concat(BitConverter.GetBytes(8341u)).ToArray()));
         var reply=crypt.Read(stream);Check(reply.Opcode==0x4B0000 && BinaryPrimitives.ReadUInt32LittleEndian(reply.Payload.AsSpan(4))==8341,"TactKey DB reply missing.");
-        stream.Write(crypt.Seal(0x4400C3,new byte[]{0,0}.Concat(BitConverter.GetBytes(0)).ToArray()));
-        var account=crypt.Read(stream);Check(account.Opcode==0x4701B4 && BinaryPrimitives.ReadInt32LittleEndian(account.Payload.AsSpan(14))==0,"Account data load wrong.");
+        stream.Write(crypt.Seal(0x4400C5,new byte[]{0,0}.Concat(BitConverter.GetBytes(0)).ToArray()));
+        var account=crypt.Read(stream);Check(account.Opcode==0x4701B5 && BinaryPrimitives.ReadInt32LittleEndian(account.Payload.AsSpan(14))==0,"Account data load wrong.");
         // Name check, create (hand-assembled 70338 layout), populated list, login decline, delete.
-        stream.Write(crypt.Seal(0x440071,BitConverter.GetBytes(9u).Concat(new byte[]{0x18,0x00}).Concat(Encoding.ASCII.GetBytes("Arthas")).ToArray()));
+        stream.Write(crypt.Seal(0x440073,BitConverter.GetBytes(9u).Concat(new byte[]{0x18,0x00}).Concat(Encoding.ASCII.GetBytes("Arthas")).ToArray()));
         var check=crypt.Read(stream);Check(check.Opcode==0x47001B && BinaryPrimitives.ReadUInt32LittleEndian(check.Payload)==9 && BinaryPrimitives.ReadUInt32LittleEndian(check.Payload.AsSpan(4))==96,"Name availability result wrong.");
         stream.Write(crypt.Seal(0x440070,CreatePayload("Arthas",1,1,0)));
-        var create=crypt.Read(stream);Check(create.Opcode==0x4701AC && BinaryPrimitives.ReadUInt32LittleEndian(create.Payload)==24 && create.Payload.AsSpan(4).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}),"Character create result/GUID wrong.");
+        var create=crypt.Read(stream);Check(create.Opcode==0x4701AD && BinaryPrimitives.ReadUInt32LittleEndian(create.Payload)==24 && create.Payload.AsSpan(4).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}),"Character create result/GUID wrong.");
         stream.Write(crypt.Seal(0x440014,Array.Empty<byte>()));
         var populated=crypt.Read(stream);Check(populated.Opcode==0x470018 && populated.Payload[0]==0xC0 && BinaryPrimitives.ReadUInt32LittleEndian(populated.Payload.AsSpan(6))==1,"Populated realmless character list wrong.");
         var restrictions=crypt.Read(stream);Check(restrictions.Opcode==0x470019 && BinaryPrimitives.ReadUInt32LittleEndian(restrictions.Payload)==1,"Character restrictions missing.");
-        Check(crypt.Read(stream).Opcode==0x470363,"Populated list release packet missing.");
+        Check(crypt.Read(stream).Opcode==0x470364,"Populated list release packet missing.");
         // PLAYER_LOGIN (guid, FarClip, RPE bit): ConnectTo with a one-time instance key, tutorial flags on the realm connection.
         stream.Write(crypt.Seal(0x440016,new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}.Concat(BitConverter.GetBytes(1000f)).Concat(new byte[]{0}).ToArray()));
         var connectTo=crypt.Read(stream);
@@ -90,11 +90,11 @@ internal static class WorldFixtures
         Check(connectTo.Payload.AsSpan(25,5).SequenceEqual(new byte[]{1,127,0,0,1}) && connectTo.Payload.AsSpan(32,13).SequenceEqual(new byte[]{0,0,0,8,0,0,0,0,0,0,0,0,0}),"ConnectTo IPv4 payload or empty bleep token wrong.");
         var world=InstanceClient(BinaryPrimitives.ReadUInt16LittleEndian(connectTo.Payload.AsSpan(30)),session,connectKey,readInstance=>{
             // Realm-connection login packets, sent while the instance socket logs in (reference order around LOGIN_VERIFY_WORLD).
-            Check(crypt.Read(stream) is {Opcode:0x470269,Payload.Length:32},"Tutorial flags missing.");
-            var characterTimes=crypt.Read(stream);Check(characterTimes.Opcode==0x4701B6 && characterTimes.Payload.AsSpan(0,6).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}) && characterTimes.Payload.Length==6+8+20*8,"Character account data times missing.");
+            Check(crypt.Read(stream) is {Opcode:0x47026A,Payload.Length:32},"Tutorial flags missing.");
+            var characterTimes=crypt.Read(stream);Check(characterTimes.Opcode==0x4701B7 && characterTimes.Payload.AsSpan(0,6).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}) && characterTimes.Payload.Length==6+8+20*8,"Character account data times missing.");
             var features=crypt.Read(stream);
             Check(features.Opcode==0x470063 && features.Payload.Length==818 && BinaryPrimitives.ReadInt32LittleEndian(features.Payload.AsSpan(147))==137 && BinaryPrimitives.ReadUInt32LittleEndian(features.Payload.AsSpan(155))==45,"In-game feature status (content set, game rules) wrong.");
-            Check(crypt.Read(stream).Opcode==0x470124,"In-game time zone missing.");
+            Check(crypt.Read(stream).Opcode==0x470125,"In-game time zone missing.");
             Check(crypt.Read(stream) is {Opcode:0x4C0001} hint && Encoding.UTF8.GetString(hint.Payload,44,hint.Payload.Length-44).Contains(".fly"),"Flight hint system message missing.");
             // Chat commands typed in /say (realm connection) act on the mover (instance connection) and answer as system messages.
             stream.Write(crypt.Seal(0x2D0023,SayPayload(".speed 2")));
@@ -116,7 +116,7 @@ internal static class WorldFixtures
         Check(Reply().Contains("blink 20"),".blink reply missing.");
         Check(Reply().Contains("slow fall on"),".slowfall reply missing.");
         Check(Reply().Contains("saved"),".loc reply missing.");
-        Check(crypt.Read(stream) is {Opcode:0x470131,Payload.Length:0},"LogoutComplete missing.");
+        Check(crypt.Read(stream) is {Opcode:0x470132,Payload.Length:0},"LogoutComplete missing.");
         var saved=inProcess?ForeverCharacterStore.Current.List().Single(c=>c.Name=="Arthas"):null;
         Check(!inProcess || saved.Map==1 && saved.Zone==1637 && saved.ActionButtons.Count==7 && saved.SlowFall && ForeverLocations.Current.Find("home") is {Map:1},"Map, zone, action bar or saved location not kept.");
         Check(!inProcess || saved.X==-8900.5f && saved.Y==-120.25f && saved.Z==90f && saved.O==1.5f && !saved.CanFly && saved.SpeedMultiplier==2f && saved.FlightMultiplier==2f,"Position or flight preferences not kept.");
@@ -125,12 +125,12 @@ internal static class WorldFixtures
         stream.Write(crypt.Seal(0x440016,new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}.Concat(BitConverter.GetBytes(1000f)).Concat(new byte[]{0}).ToArray()));
         var relogTo=crypt.Read(stream);Check(relogTo.Opcode==0x4E0008 && relogTo.Payload.Length==45,"Relog ConnectTo missing.");
         InstanceRelog(BinaryPrimitives.ReadUInt16LittleEndian(relogTo.Payload.AsSpan(30)),session,BinaryPrimitives.ReadUInt64LittleEndian(relogTo.Payload.AsSpan(9)),()=>{
-            foreach(var opcode in new uint[]{0x470269,0x4701B6,0x470063,0x470124})Check(crypt.Read(stream).Opcode==opcode,$"Relog realm packet 0x{opcode:X} missing.");
+            foreach(var opcode in new uint[]{0x47026A,0x4701B7,0x470063,0x470125})Check(crypt.Read(stream).Opcode==opcode,$"Relog realm packet 0x{opcode:X} missing.");
             stream.Write(crypt.Seal(0x3F0074,new byte[]{0}));
         });
-        Check(crypt.Read(stream) is {Opcode:0x470131,Payload.Length:0},"Relog LogoutComplete missing.");
-        stream.Write(crypt.Seal(0x4400CB,new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}));
-        var delete=crypt.Read(stream);Check(delete.Opcode==0x4701AD && BinaryPrimitives.ReadUInt32LittleEndian(delete.Payload)==67,"Character delete failed.");
+        Check(crypt.Read(stream) is {Opcode:0x470132,Payload.Length:0},"Relog LogoutComplete missing.");
+        stream.Write(crypt.Seal(0x4400CD,new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}));
+        var delete=crypt.Read(stream);Check(delete.Opcode==0x4701AE && BinaryPrimitives.ReadUInt32LittleEndian(delete.Payload)==67,"Character delete failed.");
         stream.Write(crypt.Seal(0x460006,BitConverter.GetBytes(7u).Concat(BitConverter.GetBytes(20u)).ToArray()));
         var pong=crypt.Read(stream);Check(pong.Opcode==0x4E0009 && BinaryPrimitives.ReadUInt32LittleEndian(pong.Payload)==7,"Encrypted ping/pong wrong.");
         return new{passed=true,enterEncryptedModeSignatureVerified=true,regionGroup=8,encryptedAuthResponse=true,glueFollowUps=2,emptyCharacterList=true,raceUnlocks=10,battlenetRelay=true,realmEntryForCharacterCreate=true,relayedRealmList=true,nameCheck=true,characterCreated=true,populatedList=true,connectTo=true,worldEntry=world,positionSaved=true,logout=true,characterDeleted=true,encryptedPingPong=true};
@@ -167,7 +167,7 @@ internal static class WorldFixtures
         // Known spells: the Human's language (Common, spell 668), so the client can /say at all.
         Check(crypt.Read(stream) is {Opcode:0x690019} spells && spells.Payload.SequenceEqual(new byte[]{0x80,1,0,0,0,0,0,0,0,0x9C,2,0,0}),"Known spells (language) missing.");
         CheckActionBar(crypt.Read(stream));
-        var speed=crypt.Read(stream);Check(speed.Opcode==0x4701B9 && speed.Payload.Length==20 && BitConverter.ToSingle(speed.Payload,8)==0.01666667f,"LoginSetTimeSpeed wrong.");
+        var speed=crypt.Read(stream);Check(speed.Opcode==0x4701BA && speed.Payload.Length==20 && BitConverter.ToSingle(speed.Payload,8)==0.01666667f,"LoginSetTimeSpeed wrong.");
         var update=crypt.Read(stream);var u=update.Payload;
         Check(update.Opcode==0x5E0000 && BinaryPrimitives.ReadUInt16LittleEndian(u)==0 && BinaryPrimitives.ReadUInt32LittleEndian(u.AsSpan(2))==1 && u[6]==0x80 && BinaryPrimitives.ReadUInt32LittleEndian(u.AsSpan(7))==u.Length-11,"UpdateObject header wrong.");
         Check(u[11]==2 && u.AsSpan(12,6).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08}) && u[18]==7,"Active player create block header wrong.");
@@ -196,7 +196,7 @@ internal static class WorldFixtures
         Check(crypt.Read(stream) is {Opcode:0x600000} sync && BinaryPrimitives.ReadUInt32LittleEndian(sync.Payload)==1,"Teleport time sync missing.");
         Check(crypt.Read(stream).Opcode==0x690019,"Teleport known spells missing.");
         CheckActionBar(crypt.Read(stream));
-        Check(crypt.Read(stream).Opcode==0x4701B9,"Teleport time speed missing.");
+        Check(crypt.Read(stream).Opcode==0x4701BA,"Teleport time speed missing.");
         Check(crypt.Read(stream) is {Opcode:0x5E0000} arrived && BinaryPrimitives.ReadUInt16LittleEndian(arrived.Payload)==1 && arrived.Payload[11]==2,"Create block on the new map (1) missing.");
         stream.Write(crypt.Seal(0x420064,BitConverter.GetBytes(99u)));
         CheckSpeeds(()=>crypt.Read(stream),21,2f,2f);   // flying stays off (.fly off earlier): speeds only
@@ -213,7 +213,7 @@ internal static class WorldFixtures
         Check(crypt.Read(stream) is {Opcode:0x4E0009},"Instance ping/pong wrong.");
         // CMSG_LOGOUT_REQUEST (1 byte): instant logout, LOGOUT_RESPONSE here (result 0, instant), LOGOUT_COMPLETE on the realm connection.
         stream.Write(crypt.Seal(0x3F0074,new byte[]{0}));
-        Check(crypt.Read(stream) is {Opcode:0x470130} logout && logout.Payload.SequenceEqual(new byte[]{0,0,0,0,0x80}),"LogoutResponse wrong.");
+        Check(crypt.Read(stream) is {Opcode:0x470131} logout && logout.Payload.SequenceEqual(new byte[]{0,0,0,0,0x80}),"LogoutResponse wrong.");
         Check(Closed(stream),"Instance connection still open after logout.");
         return new{continuedSession=true,resumeComms=true,loginVerifyWorld=true,timeSync=true,timeSpeed=true,updateObjectBytes=u.Length,flightEnabled=true,chatCommands=true};
     }
@@ -232,9 +232,9 @@ internal static class WorldFixtures
         stream.Write(crypt.Seal(0x460005,Array.Empty<byte>()));crypt.Enable(ForeverWorldKeys.EncryptKey(session,local,serverChallenge));
         Check(crypt.Read(stream) is {Opcode:0x4E0006},"Relog ResumeComms missing.");
         Check(crypt.Read(stream) is {Opcode:0x47002F} verify && BinaryPrimitives.ReadInt32LittleEndian(verify.Payload)==1,"Relog LoginVerifyWorld (saved map 1) wrong.");
-        foreach(var opcode in new uint[]{0x600000,0x690019,0x470083,0x4701B9,0x5E0000})Check(crypt.Read(stream).Opcode==opcode,$"Relog login packet 0x{opcode:X} missing.");
+        foreach(var opcode in new uint[]{0x600000,0x690019,0x470083,0x4701BA,0x5E0000})Check(crypt.Read(stream).Opcode==opcode,$"Relog login packet 0x{opcode:X} missing.");
         realm();
-        Check(crypt.Read(stream) is {Opcode:0x470130},"Relog LogoutResponse missing.");
+        Check(crypt.Read(stream) is {Opcode:0x470131},"Relog LogoutResponse missing.");
         Check(Closed(stream),"Relog instance connection still open after logout.");
     }
     // The server closed the connection: end of stream (or a reset).
@@ -257,7 +257,7 @@ internal static class WorldFixtures
             Check(table==0xDF2F53CF && ids.SequenceEqual(new uint[]{1,2}),"DBQueryBulk 13-bit count misparsed.");
             // Real data built by tools/extract_reference_hotfixes.py from the pinned reference.
             var real=ForeverHotfixStore.Load("data/hotfixes.json");
-            Check(real.Count==111 && Convert.ToHexString(real.DbReply(0xDF2F53CF,8341,0).AsSpan(17))=="88C375C40F07C2F861774C16E66F6B6D","Reference TactKey data changed.");
+            Check(real.Count==113 &&Convert.ToHexString(real.DbReply(0xDF2F53CF,8341,0).AsSpan(17))=="88C375C40F07C2F861774C16E66F6B6D","Reference TactKey data changed.");
             var account=new ForeverAccountData(null);var payload=Encoding.UTF8.GetBytes("SET x \"1\"");
             using var zip=new MemoryStream();using(var z=new System.IO.Compression.ZLibStream(zip,System.IO.Compression.CompressionLevel.Fastest,true))z.Write(payload);
             var update=BitConverter.GetBytes(1234L).Concat(BitConverter.GetBytes((uint)payload.Length)).Concat(new byte[]{0,0}).Concat(BitConverter.GetBytes(4)).Concat(BitConverter.GetBytes((uint)zip.Length)).Concat(zip.ToArray()).ToArray();
@@ -318,8 +318,10 @@ internal static class WorldFixtures
             foreach(var (name,surname,race,playerClass,choices,rejected) in new[]{("Abcde","Ab",(byte)1,(byte)1,20,20239u),("Abcdefghijk","Ab",(byte)96,(byte)11,36,20309u)}){
                 var shaped=ForeverPlayerObject.CreateSelf(new ForeverCharacter{Counter=3,Name=name,Surname=surname,Race=race,Class=playerClass,Sex=1,Customizations=Enumerable.Range(0,choices).Select(i=>(uint)i).ToArray()});
                 var size=BinaryPrimitives.ReadUInt32LittleEndian(shaped.AsSpan(11+8+177));
-                // +4: PerksVendorItem's int64; +4: the WoW and Battle.net account GUIDs now set (packed: 2 bytes each beyond empty).
-                Check(size==rejected+4+4 && shaped.Length==11+8+177+4+size,$"Active player values size {size} differs from the client-checked layout ({rejected}+4+4).");
+                // +4: PerksVendorItem's int64; +4: the WoW and Battle.net account GUIDs now set (packed: 2 bytes each beyond empty);
+                // +16: client 70425 and later (reference UpdateFields.cpp): three owner-only int32 after UnitData.TaxiNodesID and a
+                // fourth float before ActivePlayerData.HomeRealmTimeOffset (the fifth optional's bit fits the same byte).
+                Check(size==rejected+4+4+16 && shaped.Length==11+8+177+4+size,$"Active player values size {size} differs from the client-checked layout ({rejected}+4+4+16).");
             }
             // Owner|PartyMember create values: every visibility-gated field of the active player is present, so the size is fixed per character shape.
             foreach(var (race,playerClass) in new (byte,byte)[]{(1,1),(96,7),(95,11)}){
@@ -337,8 +339,12 @@ internal static class WorldFixtures
             Check(ForeverChat.HandleCommand(".fly",player).Contains("on") && sent[0].op==0x600035 && player.CanFly,"Fly toggle failed.");
             // .fog: the SandboxTools addon acts on these exact replies (FOG_OFF / FOG_ON in SandboxTools.lua); no packets of its own.
             var fogSent=sent.Count;
-            Check(ForeverChat.HandleCommand(".fog off",player)=="Sandbox: fog off." && ForeverChat.HandleCommand(".FOG ON",player)=="Sandbox: fog on."
-                && ForeverChat.HandleCommand(".fog",player).Contains("usage") && sent.Count==fogSent,"Fog command replies changed.");
+            // The launcher's part follows the marker file: there after .fog off, gone after .fog on, untouched by a bad command.
+            var fogMarker=Path.Combine(Path.GetTempPath(),"forever-sandbox-fog-"+Guid.NewGuid().ToString("N"));ForeverChat.FogMarkerPath=fogMarker;
+            try{
+                Check(ForeverChat.HandleCommand(".fog off",player)=="Sandbox: fog off." && File.Exists(fogMarker) && ForeverChat.HandleCommand(".fog",player).Contains("usage") && File.Exists(fogMarker)
+                    && ForeverChat.HandleCommand(".FOG ON",player)=="Sandbox: fog on." && !File.Exists(fogMarker) && sent.Count==fogSent,"Fog command replies or marker changed.");
+            }finally{ForeverChat.FogMarkerPath=null;File.Delete(fogMarker);}
             Check(ForeverChat.HandleCommand(".flyspeed 5",player)!=null && sent.Count==7 && sent[5].op==0x600024 && BitConverter.ToSingle(sent[5].payload,10)==35f,"Flight speed multiplier failed.");
             Check(ForeverMovementPackets.MoveSetSpeed(ForeverCharacterPackets.PlayerGuid(1),3,7f).SequenceEqual(new byte[]{0x01,0xE0,0x01,0x18,0x01,0x08,3,0,0,0,0,0,0xE0,0x40}),"MoveSetSpeed layout changed.");
         });
@@ -370,7 +376,7 @@ internal static class WorldFixtures
         });
         static void CheckClientInstall(string install){
             var hot=ForeverHotfixStore.Load("data/hotfixes.json");
-            ForeverTerrain.Current=null;ForeverTerrain.StartLoading(install,"1.60.1.70338",id=>hot.RecordData(ForeverHotfixStore.TactKeyTable,id));
+            ForeverTerrain.Current=null;ForeverTerrain.StartLoading(install,BgsRealmV2.ClientVersion,id=>hot.RecordData(ForeverHotfixStore.TactKeyTable,id));
             var clock=System.Diagnostics.Stopwatch.StartNew();
             while(ForeverTerrain.Current==null && !ForeverTerrain.Status.StartsWith("unavailable") && clock.Elapsed.TotalSeconds<180)Thread.Sleep(100);
             var t=ForeverTerrain.Current;Check(t!=null,"Client install did not open: "+ForeverTerrain.Status);

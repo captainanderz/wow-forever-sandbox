@@ -1,10 +1,10 @@
 // Full fog off (on by default; "fullFogOff": false in sandbox.json turns it off). The chat command .fog off makes the
-// SandboxTools addon turn the client's volumetric-fog setting off; while that setting is off, this also turns off the two
-// fog sources no setting reaches, in the running game's memory only:
+// SandboxTools addon turn the client's fog settings off and the server leave a marker file (fog-off in sandbox-data); while that
+// marker is there, this also turns off the two fog sources no setting reaches, in the running game's memory only:
 //   - Map.Flags[2] bit 15 of the current map's record in the client's in-memory Map table. The client re-derives its map-driven
 //     volumetric fog flag from that record every frame, so with the bit clear it keeps that fog off itself.
 //   - the main world scene's standard-fog switch (scene +0x71f).
-// .fog on (volumetric fog back on) restores exactly the values changed here. Executable code is never patched: the client
+// .fog on (marker gone) restores exactly the values changed here. Executable code is never patched: the client
 // checks its code and crashed about 48 s after a one-byte code patch (docs/fog.md). Writes go only to
 // committed private read/write data of the client this launcher started, re-validated while the client is paused. Nothing on
 // disk changes; it is gone when the game closes.
@@ -16,14 +16,15 @@ namespace ForeverSandbox;
 
 internal sealed class FogMonitor
 {
-    private const uint StagedGraphicsFlags = 0x56AF5B4, MapDb = 0x603AC60, MapRowLookup = 0x678550;
-    private const uint VolumeFogBit = 0x100, MapFogBit = 0x8000;
+    private const uint MapDb = 0x4C15710, MapRowLookup = 0x4CF6C0;
+    private const uint MapFogBit = 0x8000;
     private const int MapFlagsField = 25, SceneFogSwitch = 0x71F;
 
     // The Map table the owned flag addresses belong to; a reloaded table means those addresses are gone.
     private readonly record struct MapTable(ulong Loader, ulong Descriptors, ulong Palettes, ulong Palette, uint PaletteSize, uint BitOffset, uint Width);
 
     private readonly ClientMemory memory;
+    private readonly string marker;
     private MapTable? owner;
     private readonly Dictionary<ulong, uint> ownedFlags = new(); // Map.Flags[2] address -> original value
     private ulong ownedScene;
@@ -31,7 +32,7 @@ internal sealed class FogMonitor
     private string lastStatus;
     private bool reportedUnsupported;
 
-    public FogMonitor(Process owned) { memory = new ClientMemory(owned); }
+    public FogMonitor(Process owned, string markerFile) { memory = new ClientMemory(owned); marker = markerFile; }
 
     // Returns a status line when something changed.
     public string Poll()
@@ -40,10 +41,9 @@ internal sealed class FogMonitor
         {
             if (!memory.Unsupported || reportedUnsupported) return null;
             reportedUnsupported = true;
-            return "the running game's image is not the expected 70338 layout; .fog off only changes the game's settings.";
+            return "the running game is not the 1.60.1.70888 image this launcher knows; .fog off only changes the game's settings.";
         }
-        if (memory.Data(StagedGraphicsFlags, 4) is not { } flags) return null;
-        var status = (BinaryPrimitives.ReadUInt32LittleEndian(flags) & VolumeFogBit) == 0 ? Remove() : Restore();
+        var status = File.Exists(marker) ? Remove() : Restore();
         if (status == null || status == lastStatus) return null;
         lastStatus = status;
         return status;
@@ -99,7 +99,7 @@ internal sealed class FogMonitor
     // The Map table (DB object with 26 fields) and its Flags field: palette-compressed, three values per entry.
     private MapTable? Table()
     {
-        if (memory.Data(MapDb, 0x220) is not { } db || db[0x20D] != 1 || U64(db, 0x18) != 26 || U64(db, 0x48) != 26) return null;
+        if (memory.Data(MapDb, 0x220) is not { } db || U64(db, 0x18) != 26 || U64(db, 0x48) != 26) return null;
         ulong loader = U64(db, 0x160), descriptors = U64(db, 0x10), palettes = U64(db, 0x40);
         if (memory.Read(descriptors + MapFlagsField * 24, 24) is not { } d || memory.Q(palettes + MapFlagsField * 8) is not { } palette || palette == 0) return null;
         uint paletteSize = U32(d, 4), kind = U32(d, 8), bitOffset = U32(d, 12), width = U32(d, 16), values = U32(d, 20);

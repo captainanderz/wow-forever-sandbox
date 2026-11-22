@@ -30,7 +30,8 @@ foreach ($folder in 'server', 'tools') {
 Copy-Item -LiteralPath (Join-Path $staging 'launcher/ForeverSandbox.exe') -Destination (Join-Path $root 'ForeverSandbox.exe') -Force
 # The license texts travel with the binaries (the MIT and BSD licenses of the bundled code require it).
 Copy-Item -LiteralPath (Join-Path $RepoRoot 'LICENSE') -Destination (Join-Path $root 'LICENSE.txt') -Force
-Copy-Item -LiteralPath (Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md') -Destination (Join-Path $root 'THIRD-PARTY-NOTICES.txt') -Force
+$notices = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
+if (Test-Path -LiteralPath $notices) { Copy-Item -LiteralPath $notices -Destination (Join-Path $root 'THIRD-PARTY-NOTICES.txt') -Force }
 
 # Shipped data (the TACT key hotfixes) is refreshed; the player's own files in sandbox-data\ are never touched.
 $data = Join-Path $root 'sandbox-data'
@@ -39,8 +40,9 @@ Copy-Item -LiteralPath (Join-Path $RepoRoot 'data/hotfixes.json') -Destination $
 
 # With a snapshot in place: the addons go into its AddOns folder and the sandbox's own client files (the .walls models) into
 # its storage (reversible: ForeverSandbox snapshot walls remove --to client).
-if (Test-Path -LiteralPath (Join-Path $root 'client\_classic_beta_\WowB.exe')) {
-    $addonTarget = Join-Path $root 'client\_classic_beta_\Interface\AddOns'
+$snapshot = Join-Path $root 'client\snapshot.json'
+if (Test-Path -LiteralPath $snapshot) {
+    $addonTarget = Join-Path $root ('client\' + (Get-Content -LiteralPath $snapshot -Raw | ConvertFrom-Json).programFolder + '\Interface\AddOns')
     New-Item -ItemType Directory -Path $addonTarget -Force | Out-Null
     Get-ChildItem -LiteralPath (Join-Path $RepoRoot 'addons') -Directory | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $addonTarget -Recurse -Force }
     & (Join-Path $root 'tools\ForeverSnapshot.exe') walls install --to (Join-Path $root 'client')
@@ -49,10 +51,10 @@ if (Test-Path -LiteralPath (Join-Path $root 'client\_classic_beta_\WowB.exe')) {
 $settings = Join-Path $root 'sandbox.json'
 if (-not (Test-Path -LiteralPath $settings)) { [ordered]@{ clientRoot = 'client' } | ConvertTo-Json | Set-Content -LiteralPath $settings }
 @"
-Forever Sandbox (WoW Forever beta 1.60.1.70338)
+Forever Sandbox (WoW Forever 1.60.1.70888)
 
 Play:      double-click ForeverSandbox.exe, log in with admin / admin. Close the game to stop the sandbox.
-Snapshot:  client\ is a frozen copy of the 1.60.1.70338 client made from your own Battle.net install
+Snapshot:  client\ is a frozen copy of the 1.60.1.70888 client made from your own Battle.net install
            (ForeverSandbox snapshot create --from "C:\Blizzard Games\World of Warcraft" --to "<this folder>\client").
            Battle.net never updates it. Check it with: ForeverSandbox snapshot verify "<this folder>\client"
 Data:      sandbox-data\ (characters, account data, saved locations, settings). Settings: sandbox.json.

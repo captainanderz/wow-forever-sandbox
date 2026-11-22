@@ -1,4 +1,4 @@
-// Independent 70338 character-select support: race/class unlocks, name checks,
+// Independent 70888 character-select support: race/class unlocks, name checks,
 // random names, create/delete and a small persistent character list. Factual
 // layouts: pinned 5a125dfe CharacterPackets.cpp, CharacterHandler.cpp,
 // ObjectGuid.cpp and SharedDefines.h. No reference code imported.
@@ -114,9 +114,9 @@ internal sealed class ForeverCharacterStore
 
 internal static class ForeverCharacterPackets
 {
-    public const uint CreateCharacterOpcode = 0x440070, CheckNameOpcode = 0x440071, RandomNameOpcode = 0x440013, DeleteOpcode = 0x4400CB, PlayerLoginOpcode = 0x440016;
-    public const uint CheckNameResultOpcode = 0x47001B, RandomNameResultOpcode = 0x47001C, CreateCharOpcode = 0x4701AC, DeleteCharOpcode = 0x4701AD;
-    public const uint LoginFailedOpcode = 0x4701B0, RestrictionsOpcode = 0x470019, RecentAllyReleaseOpcode = 0x470363;
+    public const uint CreateCharacterOpcode = 0x440070, CheckNameOpcode = 0x440073, RandomNameOpcode = 0x440013, DeleteOpcode = 0x4400CD, PlayerLoginOpcode = 0x440016;
+    public const uint CheckNameResultOpcode = 0x47001B, RandomNameResultOpcode = 0x47001C, CreateCharOpcode = 0x4701AD, DeleteCharOpcode = 0x4701AE;
+    public const uint LoginFailedOpcode = 0x4701B1, RestrictionsOpcode = 0x470019, RecentAllyReleaseOpcode = 0x470364;
     public const uint CharCreateSuccess = 24, CharCreateFailed = 26, CharCreateNameInUse = 27, CharDeleteSuccess = 67, CharDeleteFailed = 68;
     public const uint CharNameSuccess = 96, CharNameFailure = 97;
     public const byte LoginFailedNoWorld = 1;

@@ -1,4 +1,4 @@
-// Sandbox teleports, action bars and default macros for the 70338 world session. Layouts: pinned MovementPackets.cpp
+// Sandbox teleports, action bars and default macros for the 70888 world session. Layouts: pinned MovementPackets.cpp
 // (MoveTeleport, TransferPending, SuspendToken / ResumeToken, NewWorld + TeleportLocation), SpellPackets.cpp
 // (UpdateActionButtons: 360 buttons, SetActionButton: uint64 action, uint16 index), Player.h (action packing, NEW_WORLD_NORMAL).
 // Far teleports follow Player::TeleportTo and MovementHandler.cpp: transfer pending -> suspend token -> client response ->

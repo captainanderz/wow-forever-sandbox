@@ -1,5 +1,5 @@
 // Read-only access to the local client's game files (CASC storage), for terrain heights and client tables.
-// Formats (wowdev.wiki, validated against the local 1.60.1.70338 install): .build.info, build config, local index v7
+// Formats (wowdev.wiki, validated against the local 1.60.1.70888 install): .build.info, build config, local index v7
 // (9-byte encoding keys, 5-byte offsets, 30 offset bits), data.NNN archives (30-byte header + BLTE), BLTE chunks
 // N / Z / E (Salsa20 with TACT keys), encoding (CKey -> EKey pages), root TSFM v2 (FileDataID -> CKey), WDC5 tables.
 using System;

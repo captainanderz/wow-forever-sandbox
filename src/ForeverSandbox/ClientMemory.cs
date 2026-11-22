@@ -1,6 +1,7 @@
-// Access to the running 70338 client this launcher started, shared by FogMonitor and WallOverlay (one instance per user):
+// Access to the running client this launcher started, shared by FogMonitor and WallOverlay (one instance per user):
 // its image, committed readable regions, the main world scene, and guarded writes to private read/write data.
-// The pinned WowB.exe layout is fixed (the launcher checks its hash before starting it); see docs/fog.md.
+// The addresses below are the 1.60.1.70888 Wow.exe layout (the launcher checks the executable's hash before starting it); an
+// image of another size is left alone: Attach reports Unsupported and nothing is read or written. See docs/fog.md.
 using System.Buffers.Binary;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -11,8 +12,8 @@ namespace ForeverSandbox;
 internal sealed class ClientMemory
 {
     // Image size, .data range and RVAs in .data.
-    private const uint ImageSize = 0x84B8000, DataStart = 0x5664000, DataEnd = 0x5664000 + 0x2A1C5E1;
-    private const uint SceneGlobal = 0x7A08CF8, SceneListLinkOffset = 0x5746908, SceneListHead = 0x5746910;
+    private const uint ImageSize = 0x730D000, DataStart = 0x46E3000, DataEnd = 0x46E3000 + 0x2864101;
+    private const uint SceneGlobal = 0x6C35E68, SceneListLinkOffset = 0x47C3350, SceneListHead = 0x47C3358;
     // The client's image is a mapped section (MEM_MAPPED), not a loader image (MEM_IMAGE).
     private const uint MemCommit = 0x1000, MemPrivate = 0x20000, MemMapped = 0x40000, MemImage = 0x1000000, PageReadWrite = 4;
 

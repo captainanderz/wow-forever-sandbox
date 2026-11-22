@@ -66,7 +66,7 @@ end
 -- ForeverChat.FogOffReply / FogOnReply) is the signal for this addon to change the client's own fog settings. Off disables the
 -- "full fog" distance band (disableHorizonStart, horizonStart moved out to the horizon clip) and volumetric fog outdoors and
 -- indoors. The previous values are kept in SandboxToolsSettings and restored by .fog on; the game saves the settings itself,
--- so the choice persists. ForeverSandbox.exe watches the volumetric-fog setting: while it is off, the launcher also clears the
+-- so the choice persists. The server keeps a marker for ForeverSandbox.exe: while fog is off, the launcher also clears the
 -- map's own fog and the scene fog switch in the game's memory (no setting reaches those), and restores them when it is back on.
 local FOG_SETTINGS = { "disableHorizonStart", "horizonStart", "volumeFog", "volumeFogInterior" }
 local FOG_OFF, FOG_ON = "Sandbox: fog off.", "Sandbox: fog on."

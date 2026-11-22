@@ -13,8 +13,10 @@ namespace ForeverSnapshot;
 
 internal static class Program
 {
-    private const string DefaultProduct = "wow_classic_beta", DefaultVersion = "1.60.1.70338";
-    private static readonly string[] SkippedProgramFolders = { "Cache", "Logs", "Errors", "Screenshots", "WTF" };
+    private const string DefaultProduct = "wowf", DefaultVersion = "1.60.1.70888";
+    private static readonly string[] Executables = { "Wow.exe", "wow_loader.dll" };
+    // Per-machine state, and Interface: it only holds the player's own addons for the live game (not part of the build).
+    private static readonly string[] SkippedProgramFolders = { "Cache", "Logs", "Errors", "Screenshots", "WTF", "Interface" };
     private static readonly string[] SandboxConfigs = { "ForeverSandbox.wtf" };
 
     private static int Main(string[] args)
@@ -28,7 +30,7 @@ internal static class Program
                 case "verify": return Verify(args.Length > 1 && !args[1].StartsWith("--") ? args[1] : Required(options, "client"), options.ContainsKey("quick"));
                 case "walls": return Walls(args.Length > 1 ? args[1] : "", Required(options, "to"));
                 default:
-                    Console.WriteLine("ForeverSnapshot create --from <Battle.net WoW folder> --to <snapshot folder> [--product wow_classic_beta] [--version 1.60.1.70338]");
+                    Console.WriteLine("ForeverSnapshot create --from <Battle.net WoW folder> --to <snapshot folder> [--product " + DefaultProduct + "] [--version " + DefaultVersion + "]");
                     Console.WriteLine("ForeverSnapshot verify <snapshot folder> [--quick]");
                     Console.WriteLine("ForeverSnapshot walls install|remove|status --to <snapshot folder>   (the .walls models)");
                     return 2;
@@ -131,7 +133,7 @@ internal static class Program
         from = Path.GetFullPath(from).TrimEnd('\\'); to = Path.GetFullPath(to).TrimEnd('\\');
         if (to.StartsWith(from + "\\", StringComparison.OrdinalIgnoreCase) || to.Equals(from, StringComparison.OrdinalIgnoreCase))
             throw new ArgumentException("The snapshot folder must be outside the Battle.net install.");
-        if (Process.GetProcessesByName("WowB").Length > 0) throw new InvalidOperationException("Close the game first: it compacts its storage while running.");
+        if (Process.GetProcessesByName("Wow").Length > 0) throw new InvalidOperationException("Close the game first: it compacts its storage while running.");
 
         var info = BuildInfo.Read(from, product, version);
         var programFolder = ProgramFolder(from, product);
@@ -172,18 +174,28 @@ internal static class Program
         Console.WriteLine($"Build content: {needed.Count:N0} entries, {totalBytes / 1e9:F2} GB; {loose} install files kept as loose files; {missing} not stored locally ({missingBytes / 1e9:F2} GB).");
         if (missing > 0) throw new InvalidDataException("Some of the build's content is not downloaded; the snapshot would not be complete.");
 
-        // Every source header must check out at its current place before anything is written (proves the checksum code).
+        // Every source header must check out at its current place before anything is written (proves the checksum code). The few
+        // that do not are entries the agent listed without writing them; those come from the CDN (Cdn.cs), now, so a failure
+        // shows before the long copy.
         Console.Write("Checking source headers... ");
         Span<byte> header = stackalloc byte[HeaderSize];
-        var checkedHeaders = 0;
+        var unwritten = new List<Key9>();
         foreach (var (key, location) in needed.OrderBy(p => p.Value.Archive).ThenBy(p => p.Value.Offset))
         {
             source.ReadRaw(location with { Size = HeaderSize }, header);
-            if (!HeaderKeyMatches(header, key) || !ChecksumsValid(header, location.Archive, location.Offset))
-                throw new InvalidDataException($"Source header for {key} at data.{location.Archive:D3}+{location.Offset} does not verify.");
-            checkedHeaders++;
+            if (HeaderKeyMatches(header, key) && ChecksumsValid(header, location.Archive, location.Offset)) continue;
+            unwritten.Add(key);
+            if (unwritten.Count > 1000) throw new InvalidDataException($"Too many source headers do not verify (first: {unwritten[0]} at data.{needed[unwritten[0]].Archive:D3}+{needed[unwritten[0]].Offset}).");
         }
-        Console.WriteLine($"{checkedHeaders:N0} verified.");
+        Console.WriteLine($"{needed.Count - unwritten.Count:N0} verified.");
+        using var cdnSource = new Cdn(info, cdn, source.DataDirectory);
+        var fetched = new Dictionary<Key9, byte[]>();
+        foreach (var key in unwritten)
+        {
+            fetched[key] = cdnSource.Fetch(key) is { } copy && copy.Length == needed[key].Size ? copy
+                : throw new InvalidDataException($"Source header for {key} at data.{needed[key].Archive:D3}+{needed[key].Offset} does not verify, and the CDN has no copy of that size.");
+        }
+        if (fetched.Count > 0) Console.WriteLine($"{fetched.Count} entries were listed by Battle.net but never written; fetched from the CDN ({fetched.Values.Sum(f => f.Length):N0} bytes).");
 
         var placed = SnapshotWriter.Layout(needed.Select(p => (p.Key, p.Value)));
         var archiveCount = placed.Count == 0 ? 0 : placed[^1].Archive + 1;
@@ -216,7 +228,7 @@ internal static class Program
                 lastReport = clock.Elapsed;
                 var rate = (done - startDone) / Math.Max(1, clock.Elapsed.TotalSeconds);
                 Console.Write($"\rCopying: archive {group.Key + 1}/{archiveCount}, {done / 1e9:F2}/{totalBytes / 1e9:F2} GB, {rate / 1e6:F0} MB/s, about {TimeSpan.FromSeconds((totalBytes - done) / Math.Max(1, rate)):hh\\:mm\\:ss} left   ");
-            }, holes);
+            }, holes, key => fetched.TryGetValue(key, out var copy) ? copy : cdnSource.Fetch(key));
             progress.Holes.AddRange(holes.Select(h => h.ToString()));
             progress.CompletedArchives.Add(group.Key);
             SaveProgress(progressPath, progress);
@@ -256,14 +268,18 @@ internal static class Program
         var verifiedFiles = VerifyInstallFiles(installFiles, programTarget);
         Console.WriteLine($"Copied the program folder; {verifiedFiles} install files match the install manifest.");
 
-        File.WriteAllLines(Path.Combine(to, ".build.info"), new[] { string.Join('|', info.Header), string.Join('|', info.Row) });
+        // A frozen snapshot never goes to the CDN: its .build.info names no CDN hosts (the install's own row: .build.info.original).
+        var row = info.Row.ToArray();
+        foreach (var column in new[] { "CDN Hosts", "CDN Servers" }) row[Array.FindIndex(info.Header, h => h.Split('!')[0] == column)] = "";
+        File.WriteAllLines(Path.Combine(to, ".build.info.original"), new[] { string.Join('|', info.Header), string.Join('|', info.Row) });
+        File.WriteAllLines(Path.Combine(to, ".build.info"), new[] { string.Join('|', info.Header), string.Join('|', row) });
         var manifest = new Dictionary<string, object>
         {
             ["product"] = product, ["version"] = version, ["buildName"] = build.GetValueOrDefault("build-name", Array.Empty<string>()).FirstOrDefault(),
             ["buildKey"] = info["Build Key"], ["cdnKey"] = info["CDN Key"], ["programFolder"] = Path.GetFileName(programFolder),
             ["selectedTags"] = info.SelectedTags, ["entries"] = needed.Count, ["bytes"] = totalBytes, ["archives"] = archiveCount,
             ["installFilesVerified"] = verifiedFiles, ["holes"] = progress.Holes, ["cdnIndices"] = indexCount, ["layoutSha256"] = layoutHash,
-            ["executables"] = new[] { "WowB.exe", "WowB_loader.dll" }.Where(f => File.Exists(Path.Combine(programTarget, f)))
+            ["executables"] = Executables.Where(f => File.Exists(Path.Combine(programTarget, f)))
                 .ToDictionary(f => f, f => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(programTarget, f))))),
             ["createdUtc"] = DateTime.UtcNow.ToString("O"), ["tool"] = "ForeverSnapshot 1",
         };

@@ -1,6 +1,6 @@
 // Sandbox-made client files for .walls, shared by ForeverSnapshot (which builds them into the snapshot: `walls install`) and the
 // server (which offers GameObjectDisplayInfo rows for them as hotfixes and places them). FileDataIDs and display IDs are far above
-// anything the 70338 client has (FileDataIDs end near 7.2 million, GameObjectDisplayInfo IDs at 133941).
+// anything the 70888 client has (FileDataIDs end near 7.2 million, GameObjectDisplayInfo IDs at 133941).
 namespace AuthServer.Network;
 
 internal static class ForeverWallModels

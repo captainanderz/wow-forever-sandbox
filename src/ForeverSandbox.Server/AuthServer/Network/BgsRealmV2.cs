@@ -29,6 +29,9 @@ internal static class BgsRealmV2
 {
     public const uint ServiceHash = 0x5DBB51C2, NameHash = 0x0FD547D8;
     public const uint RealmAddress = 0x46010046;
+    // The one client build this server speaks (opcodes, update fields); the launcher checks the executables' hashes.
+    public const uint ClientBuild = 70888;
+    public const string ClientVersion = "1.60.1.70888";
     public const string SubRegion = "70-1-70", DemoGameAccount = "sandbox";
     public const int MaxRequestBytes = 131072;
     private const uint Malformed = 0xBC5, Unimplemented = 0xBC7;
@@ -80,7 +83,7 @@ internal static class BgsRealmV2
                 if (!attributes.TryGetValue("Param_ClientInfo", out var clientInfo) || clientInfo.Kind != 5) return (3, Array.Empty<byte>(), "client_info_missing");
                 using (var document = Envelope(clientInfo.Blob, "JSONRealmListTicketClientInformation")) {
                     var info = document.RootElement.GetProperty("info");
-                    if (info.GetProperty("version").GetProperty("versionBuild").GetUInt32() != 70338) return (3, Array.Empty<byte>(), "build_denied");
+                    if (info.GetProperty("version").GetProperty("versionBuild").GetUInt32() != ClientBuild) return (3, Array.Empty<byte>(), "build_denied");
                     var encoded = info.GetProperty("secret");
                     byte[] secret;
                     if (encoded.ValueKind == JsonValueKind.String) secret = Convert.FromBase64String(encoded.GetString());
@@ -129,7 +132,7 @@ internal static class BgsRealmV2
         }
     }
     private static object RealmEntry() => new { wowRealmAddress=RealmAddress, cfgTimezonesID=1, populationState=1, cfgCategoriesID=1,
-        version=new {versionMajor=1,versionMinor=60,versionRevision=1,versionBuild=70338}, cfgRealmsID=70,flags=0,name="Forever Sandbox",
+        version=new {versionMajor=1,versionMinor=60,versionRevision=1,versionBuild=ClientBuild}, cfgRealmsID=70,flags=0,name="Forever Sandbox",
         cfgConfigsID=1,cfgLanguagesID=1,cfgContentSetID=137,superDistrictID=2,useBleepChance=0.0 };
     private static JsonDocument Envelope(byte[] bytes, string prefix) {
         if (bytes == null || bytes.Length > 32768) throw new FormatException("Invalid bounded realm JSON.");

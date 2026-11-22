@@ -1,4 +1,4 @@
-// Realm-key write (opt-in): the beta keeps the Ed25519 public keys that authenticate EnterEncryptedMode in a 480-byte heap table;
+// Realm-key write (opt-in): the client keeps the Ed25519 public keys that authenticate EnterEncryptedMode in a 480-byte heap table;
 // the sandbox's world server signs with the key whose public half replaces group 8, as ForeverLauncher does. Rules: only
 // committed MEM_PRIVATE/PAGE_READWRITE memory of the client this launcher started, a fully validated table, one 32-byte write while the client is paused, read-back,
 // and a guarded rollback. Nothing on disk changes; it is gone when the game closes.
@@ -16,8 +16,8 @@ internal sealed class RealmKeyStore
     private const int EntrySize = 40, EntryCount = 12, KeySize = 32, BlockSize = EntrySize * EntryCount, TargetGroup = 8;
     private const int KeyOffset = (TargetGroup - 1) * EntrySize + 4;
     private const uint MemCommit = 0x1000, MemPrivate = 0x20000, PageReadWrite = 4;
+    // Entry: uint32 group, 32-byte key, flag, 3 padding bytes (0x7F 00 00 in the beta, zeros in the release client: not checked).
     private static readonly byte[] Flags = { 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1 };
-    private static readonly byte[] Padding = { 0x7F, 0x00, 0x00 };
     private static readonly byte[][] KnownKeys = new[]
     {
         "9B0671C815DFF513BFD4A2B26AE1F84EC9106841B2FB620DB65F6ADE7C21AD06", "112451B9843C2799E4750AA3D9B9AFABF536A645B863C4ADB2078B932B354E04",
@@ -49,7 +49,7 @@ internal sealed class RealmKeyStore
             if (BinaryPrimitives.ReadUInt32LittleEndian(entry) != i + 1) return StoreState.Invalid;
             var key = entry.Slice(4, KeySize);
             if (!key.SequenceEqual(KnownKeys[i]) && !(i == TargetGroup - 1 && key.SequenceEqual(SandboxPublicKey))) return StoreState.Invalid;
-            if (entry[36] != Flags[i] || !entry.Slice(37, 3).SequenceEqual(Padding)) return StoreState.Invalid;
+            if (entry[36] != Flags[i]) return StoreState.Invalid;
         }
         return block.Slice(KeyOffset, KeySize).SequenceEqual(SandboxPublicKey) ? StoreState.Patched : StoreState.Original;
     }

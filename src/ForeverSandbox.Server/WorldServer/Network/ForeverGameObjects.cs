@@ -1,4 +1,4 @@
-// Server-side game objects for the 70338 client (no database): create blocks and removals in SMSG_UPDATE_OBJECT.
+// Server-side game objects for the 70888 client (no database): create blocks and removals in SMSG_UPDATE_OBJECT.
 // Layouts: pinned BaseEntity.cpp (BuildCreateUpdateBlockForPlayer, BuildMovementUpdate: a GameObject has the WorldObject entity
 // position plus Stationary and Rotation), UpdateData.cpp (out-of-range list), ObjectGuid.cpp CreateWorldObject (HighGuid
 // GameObject 11), GameObject::UpdatePackedRotation, and the generated ObjectData / GameObjectData writers.

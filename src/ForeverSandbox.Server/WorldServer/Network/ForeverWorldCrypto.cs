@@ -1,4 +1,4 @@
-// Independent 70338 world session keys, EnterEncryptedMode signature and AES-GCM
+// Independent 70888 world session keys, EnterEncryptedMode signature and AES-GCM
 // framing. Factual constants/layouts: pinned 5a125dfe WorldSocket.cpp,
 // AuthenticationPackets.cpp, WorldPacketCrypt.cpp and SessionKeyGenerator.h.
 // No reference code imported. Secrets are never logged.

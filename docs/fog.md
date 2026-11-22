@@ -1,11 +1,12 @@
 # Fog removal
 
-`.fog off` in chat removes all fog. `.fog on` brings it back. Fog in the 1.60.1.70338 client has three sources, and only the
+`.fog off` in chat removes all fog. `.fog on` brings it back. Fog in the 1.60.1.70888 client has three sources, and only the
 first can be reached through a game setting.
 
 `.fog` is a server command, but the server cannot change the client's settings itself. Its reply is the signal instead: when
 the SandboxTools addon sees the system message `Sandbox: fog off.` or `Sandbox: fog on.`, it changes the fog settings. The
-launcher then takes care of the other two sources.
+server also keeps a marker file, `sandbox-data/fog-off` (created by `.fog off`, deleted by `.fog on`), and while it exists
+the launcher takes care of the other two sources.
 
 | Source | Where | Turned off by |
 | --- | --- | --- |
@@ -17,16 +18,17 @@ launcher then takes care of the other two sources.
 
 `src/ForeverSandbox/Fog.cs` (`FogMonitor`) polls the client the launcher started.
 
-- **Trigger.** When the staged graphics flags (`0x56AF5B4`) show bit 8 clear, which is what the addon does on `.fog off`, it:
-  - clears bit 15 of `Map.Flags[2]` (field 25) for the current map, in the client's Map table (database at `0x603AC60`);
-  - clears the fog switch at `+0x71F` of the main world scene, found through the scene list at `0x5746910` and checked
-    against the scene global `0x7A08CF8`.
+- **Trigger.** While the marker file `sandbox-data/fog-off` exists, it:
+  - clears bit 15 of `Map.Flags[2]` (field 25) for the current map, in the client's Map table (database at `0x4C15710`);
+  - clears the fog switch at `+0x71F` of the main world scene, found through the scene list at `0x47C3358` and checked
+    against the scene global `0x6C35E68`.
 - **Restore.** It records every original value. On `.fog on` it puts them back, but only if the Map table and the scene are
   still the same objects.
 - **Map changes.** The current map is checked every poll, so fog stays off after a teleport or loading screen.
 
 Addresses are relative to the client image, which is a `MEM_MAPPED` section (not `MEM_IMAGE`). They are only valid for the
-pinned `WowB.exe`. The launcher refuses any other build by hash.
+pinned `Wow.exe`. The launcher refuses any other build by hash. The structures behind them (scene list, scene fields, Map
+table rows and flag palette) are the same as in the 1.60.1.70338 beta; only the addresses moved.
 
 `"fullFogOff": false` in `sandbox.json` turns the launcher part off. `.fog off` then only changes the game settings.
 

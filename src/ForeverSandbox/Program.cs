@@ -1,4 +1,4 @@
-// ForeverSandbox.exe: the standalone Forever 1.60.1.70338 sandbox.
+// ForeverSandbox.exe: the standalone Forever 1.60.1.70888 sandbox.
 //   ForeverSandbox [play]                      start the server and the frozen client (default)
 //   ForeverSandbox setup                       local login certificates only
 //   ForeverSandbox snapshot create|verify ...  tools\ForeverSnapshot (make or check the frozen client copy)
@@ -15,11 +15,12 @@ namespace ForeverSandbox;
 
 internal static class Program
 {
-    // The only build the server speaks (packets, update fields): the exact 70338 executables.
+    // The only build the server speaks (packets, update fields): the exact 70888 executables.
+    private const string SupportedVersion = "1.60.1.70888", GameExe = "Wow.exe";
     private static readonly Dictionary<string, string> SupportedBuild = new()
     {
-        ["WowB.exe"] = "CFE26CC200FDA36407736C7E6B5575A1F2CA2B774C8176529814E32D51312185",
-        ["WowB_loader.dll"] = "3788774B157CC0BACC394E7774C3AA51D56892DD97032394B78A5BD4BDA78518",
+        [GameExe] = "054A166A86C2AB79F49366D319458A77C0653F0410C6ADD534385796F1DC32A9",
+        ["wow_loader.dll"] = "722ED8EF79027D36B3E22F6CD470DE0F7AC25000E2AB80C9B1F4DD42398BF0AD",
     };
     private const int AuthPort = 8000, RestPort = 8001, RealmPort = 8085, InstancePort = 3724;
 
@@ -56,11 +57,11 @@ internal static class Program
         if (!File.Exists(manifestPath)) throw new IOException($"No client snapshot in {clientRoot}. Make one with: ForeverSandbox snapshot create --from \"C:\\Blizzard Games\\World of Warcraft\" --to \"{clientRoot}\"");
         var manifest = JsonDocument.Parse(File.ReadAllText(manifestPath)).RootElement;
         var programFolder = Path.Combine(clientRoot, manifest.GetProperty("programFolder").GetString()!);
-        var exe = Path.Combine(programFolder, "WowB.exe");
+        var exe = Path.Combine(programFolder, GameExe);
         foreach (var (file, hash) in SupportedBuild)
             if (Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.Combine(programFolder, file)))) != hash)
-                throw new InvalidOperationException($"{file} in the snapshot is not the 1.60.1.70338 build this sandbox supports.");
-        if (Process.GetProcessesByName("WowB").Any(p => SamePath(p, exe))) throw new InvalidOperationException("The sandbox game is already running.");
+                throw new InvalidOperationException($"{file} in the snapshot is not the {SupportedVersion} build this sandbox supports.");
+        if (Process.GetProcessesByName(Path.GetFileNameWithoutExtension(GameExe)).Any(p => SamePath(p, exe))) throw new InvalidOperationException("The sandbox game is already running.");
 
         // The world connection needs the realm-key write (one 32-byte public key in the running game's memory, like
         // ForeverLauncher). It is opt-in: asked once, remembered in sandbox.json.
@@ -97,7 +98,7 @@ internal static class Program
             Console.WriteLine("Type .help in chat for the sandbox commands, .fog off for no fog. Close the game to stop the sandbox.");
             var monitor = realmKey == true ? new RealmKeyMonitor(client, ready.GetProperty("diagnosticLogPath").GetString()!, Path.Combine(state, "realm-key-patched")) : null;
             // .fog off also clears the map and scene fog no game setting reaches (Fog.cs); "fullFogOff": false turns that off.
-            var fog = (bool?)settings["fullFogOff"] != false ? new FogMonitor(client) : null;
+            var fog = (bool?)settings["fullFogOff"] != false ? new FogMonitor(client, Path.Combine(data, "fog-off")) : null;
             // .walls overlay draws impassable terrain walls over the game window (Walls.cs); the server writes them here.
             using var walls = new WallOverlay(client, Path.Combine(state, "impass-walls.json"));
             var stop = false;

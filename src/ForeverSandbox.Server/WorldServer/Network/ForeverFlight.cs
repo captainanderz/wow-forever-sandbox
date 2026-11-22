@@ -1,9 +1,10 @@
-// Sandbox flight and chat commands for the 70338 world session. Layouts: pinned MovementPackets.cpp
+// Sandbox flight and chat commands for the 70888 world session. Layouts: pinned MovementPackets.cpp
 // (MoveSetFlag, MoveSetSpeed), ChatPackets.cpp (ChatMessage::Read, Chat::Write); opcodes are retail
 // numbers shifted like the rest of the session (movement +2 groups, chat group +2 with CHAT keeping index 1).
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -237,8 +238,10 @@ internal static class ForeverChat
 {
     public const uint ChatOpcode = 0x4C0001;   // SMSG_CHAT (retail 0x4A0001)
     // .fog replies. The SandboxTools addon watches system messages for exactly these two lines and then changes the client's fog
-    // settings; the launcher clears the fog no setting reaches (src/ForeverSandbox/Fog.cs). Keep them in sync with the addon.
+    // settings. Keep them in sync with the addon. The launcher clears the fog no setting reaches (src/ForeverSandbox/Fog.cs)
+    // while the marker file exists: .fog off creates it, .fog on deletes it, and it stays between runs like the settings do.
     public const string FogOffReply = "Sandbox: fog off.", FogOnReply = "Sandbox: fog on.";
+    internal static string FogMarkerPath;
     // Client chat group 0x2D: SAY is 0x2D0023 by the reference's default mapping (retail 0x2C0023, same index), but this group is
     // partly renumbered in Classic (CHANNEL_LIST retail 0x11 -> 0x0F), so commands are accepted from any chat message opcode past the
     // channel requests; the exact-length check and the leading '.' keep other messages out.
@@ -315,12 +318,11 @@ internal static class ForeverChat
             case "tele" or "go":
                 return TeleportCommand(parts, player);
             case "fog":
-                return (parts.Length > 1 ? parts[1].ToLowerInvariant() : "") switch
-                {
-                    "off" or "0" => FogOffReply,
-                    "on" or "1" => FogOnReply,
-                    _ => "Sandbox: usage .fog off | .fog on",
-                };
+                var fogOff = (parts.Length > 1 ? parts[1].ToLowerInvariant() : "") switch { "off" or "0" => true, "on" or "1" => false, _ => (bool?)null };
+                if (fogOff == null) return "Sandbox: usage .fog off | .fog on";
+                try { if (FogMarkerPath != null) { if (fogOff == true) File.WriteAllBytes(FogMarkerPath, Array.Empty<byte>()); else File.Delete(FogMarkerPath); } }
+                catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }   // the settings part still works
+                return fogOff == true ? FogOffReply : FogOnReply;
             case "walls":
                 return ForeverImpassWalls.Command(parts, player);
             case "gob":

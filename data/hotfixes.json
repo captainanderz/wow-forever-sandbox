@@ -1,6 +1,6 @@
 {
- "description": "TactKey hotfixes for WoW Forever 1.60.1.70338 (sandbox server data).",
- "reference": "https://github.com/advocaite/TrinityCore 5a125dfe7031b8abc2a0e32c487a9351577aff0d",
+ "description": "TactKey hotfixes for WoW Forever 1.60.1.70888 (sandbox server data).",
+ "reference": "https://github.com/advocaite/TrinityCore 7d7c05ef83487b8d292584a0e69a2fd1249a5f59",
  "sources": [
   {
    "file": "2026_09_28_01_hotfixes_classic_tact_keys.sql",
@@ -12,7 +12,15 @@
   },
   {
    "file": "2026_10_01_02_hotfixes_forever_sniff.sql",
-   "sha256": "217c217e4e9dc26894eb7f640cbf399b5e0fc28f0ed31b68d0045e24819f96df"
+   "sha256": "74ce6a2b866c5c93cd854e5f8f196eb8054ea3da42b7b8f9dd710cfdbe5c57cd"
+  },
+  {
+   "file": "2026_11_05_00_hotfixes_classic_70790_tact_keys.sql",
+   "sha256": "478cf138ef44702f7d05c0f38c82f03d99c091d1217f956bb93d30ebe85fc999"
+  },
+  {
+   "file": "2026_11_07_00_hotfixes_classic_70840_tact_keys.sql",
+   "sha256": "8bfa0bfe5f713abeb06b8c01e8fee3ee3e5adc1c8bdcccbeb51b6ac7cca10099"
   }
  ],
  "records": [
@@ -881,24 +889,40 @@
    "data": "94952F65B86F0B82F656CEC860D64FE6"
   },
   {
-   "push": 1005415,
-   "unique": 1397636151,
+   "push": 970108,
+   "unique": 2059870299,
+   "table": 3744420815,
+   "record": 8283,
+   "status": 1,
+   "data": "D31C74FE3705AF574888E4A230785481"
+  },
+  {
+   "push": 970109,
+   "unique": 2059870337,
+   "table": 3744420815,
+   "record": 8321,
+   "status": 1,
+   "data": "580EBA1743A9289E1FBD5ACD9B7FD99B"
+  },
+  {
+   "push": 970110,
+   "unique": 2059870357,
    "table": 3744420815,
    "record": 8341,
    "status": 1,
    "data": "88C375C40F07C2F861774C16E66F6B6D"
   },
   {
-   "push": 1005416,
-   "unique": 1397636152,
+   "push": 970111,
+   "unique": 2059870358,
    "table": 3744420815,
    "record": 8342,
    "status": 1,
    "data": "C1D4A6DFC1E5C49BADE8FB6A0C318013"
   },
   {
-   "push": 1005417,
-   "unique": 1397636153,
+   "push": 970112,
+   "unique": 2059870359,
    "table": 3744420815,
    "record": 8343,
    "status": 1,

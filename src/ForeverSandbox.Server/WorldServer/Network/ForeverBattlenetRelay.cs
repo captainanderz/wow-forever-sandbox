@@ -1,4 +1,4 @@
-// Independent 70338 Battle.net-over-world relay. After the world login the client
+// Independent 70888 Battle.net-over-world relay. After the world login the client
 // drops its direct BGS connection and sends realm/ruleset RPCs through the world
 // socket (character create waits for one of them). Factual layouts: pinned 5a125dfe
 // BattlenetPackets.cpp, BattlenetHandler.cpp, WorldSession.cpp. No reference code imported.
@@ -10,8 +10,8 @@ namespace AuthServer.Network;
 
 internal static class ForeverBattlenetRelay
 {
-    public const uint RequestOpcode = 0x440124, ChangeRealmTicketOpcode = 0x440129;
-    public const uint ResponseOpcode = 0x4702B0, ConnectionStatusOpcode = 0x4702B2, ChangeRealmTicketResponseOpcode = 0x4702B3;
+    public const uint RequestOpcode = 0x440126, ChangeRealmTicketOpcode = 0x44012B;
+    public const uint ResponseOpcode = 0x4702B1, ConnectionStatusOpcode = 0x4702B3, ChangeRealmTicketResponseOpcode = 0x4702B4;
     public const uint NotImplemented = 0xBC7;
     private const uint FriendsServiceHash = 0x5869BE8C, BlockListServiceHash = 0x8E8F5FB0, SubscribeMethod = 0x40000001;
     // Resources GetContentHandle (profanity list 'apft'): declined. The official handle makes the client fetch the file

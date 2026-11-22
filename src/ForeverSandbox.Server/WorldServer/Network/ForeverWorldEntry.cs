@@ -1,4 +1,4 @@
-// Independent 70338 world entry: PLAYER_LOGIN -> SMSG_CONNECT_TO -> instance socket
+// Independent 70888 world entry: PLAYER_LOGIN -> SMSG_CONNECT_TO -> instance socket
 // (AuthContinuedSession, signed EnterEncryptedMode) -> login packets with the active
 // player's create block. Factual layouts: pinned 5a125dfe WorldSession.cpp,
 // AuthenticationPackets, BaseEntity.cpp (create/movement blocks), UpdateData.cpp,
@@ -153,8 +153,8 @@ internal static class ForeverInstanceRegistry
 
 internal static class ForeverLoginPackets
 {
-    public const uint ConnectToOpcode = 0x4E0008, ResumeCommsOpcode = 0x4E0006, LoginVerifyWorldOpcode = 0x47002F, TutorialFlagsOpcode = 0x470269;
-    public const uint LoginSetTimeSpeedOpcode = 0x4701B9, TimeSyncRequestOpcode = 0x600000;
+    public const uint ConnectToOpcode = 0x4E0008, ResumeCommsOpcode = 0x4E0006, LoginVerifyWorldOpcode = 0x47002F, TutorialFlagsOpcode = 0x47026A;
+    public const uint LoginSetTimeSpeedOpcode = 0x4701BA, TimeSyncRequestOpcode = 0x600000;
     public const uint AuthContinuedSessionOpcode = 0x460003, QueuedMessagesEndOpcode = 0x46000B, LoadingScreenNotifyOpcode = 0x440024;
     public const uint TimeSyncResponseOpcode = 0x42005C, MoveInitActiveMoverCompleteOpcode = 0x420064, ConnectToFailedOpcode = 0x440000;
     public const uint WorldAttempt1 = 17;
@@ -177,7 +177,7 @@ internal static class ForeverLoginPackets
 
     // Logout (client 0x3F0074 / 0x3F0075 per the official 70338 sniff notes in ClassicClientOpcodes.inc; server retail 0x45012F-0x450131).
     public const uint LogoutRequestOpcode = 0x3F0074, LogoutCancelOpcode = 0x3F0075;
-    public const uint LogoutResponseOpcode = 0x470130, LogoutCompleteOpcode = 0x470131, LogoutCancelAckOpcode = 0x470132;
+    public const uint LogoutResponseOpcode = 0x470131, LogoutCompleteOpcode = 0x470132, LogoutCancelAckOpcode = 0x470133;
     // SMSG_LOGOUT_RESPONSE: int32 result (0 = ok), 1 bit instant.
     public static byte[] LogoutResponse() => new ForeverPacketWriter().I32(0).Bit(true).Flush().ToArray();
     public static byte[] TutorialFlags() => new byte[32];

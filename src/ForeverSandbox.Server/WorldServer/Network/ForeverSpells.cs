@@ -14,7 +14,7 @@ internal static class ForeverSpells
 {
     public const uint CastSpellOpcode = 0x3E0176;                                  // client (reference ClassicClientOpcodes.inc)
     public const uint SpellStartOpcode = 0x69002D, SpellGoOpcode = 0x69002C, CastFailedOpcode = 0x69004A, LearnedSpellsOpcode = 0x690040;   // instance
-    public const uint PowerUpdateOpcode = 0x47017E;                                // realm (retail 0x45017E, Classic index - 1, then + 1)
+    public const uint PowerUpdateOpcode = 0x47017F;                                // realm (retail 0x45017E, Classic index - 1, then + 1)
     public const uint CastFlagHasTrajectory = 0x2, CastFlagUnknown9 = 0x100, CastFlagPowerLeftSelf = 0x800, CastFlagFromClient = 0x40000;
     public const uint TargetFlagDestLocation = 0x40;
     public const int FailedNotKnown = 87, FailedNotReady = 91, FailedNoPower = 108, FailedUnavailable = 128;

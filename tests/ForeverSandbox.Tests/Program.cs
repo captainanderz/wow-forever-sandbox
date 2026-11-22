@@ -155,7 +155,7 @@ if ((args.Length == 4 || args.Length == 5 && args[0] == "--probe-auth-v2") && (a
             var authHeader = new Header { ServiceId = 0, ServiceHash = 0x0DECFC01, MethodId = method, Token = token, Size = (uint)body.Length }.ToByteArray();
             tls.Write(new[] { (byte)(authHeader.Length >> 8), (byte)authHeader.Length }.Concat(authHeader).Concat(body).ToArray());
         }
-        SendAuth(new LogonRequest { Program = "WoW", Platform = "Win64", Locale = "enUS", ApplicationVersion = 70338, WebClientVerification = true }, 1, 91);
+        SendAuth(new LogonRequest { Program = "WoW", Platform = "Win64", Locale = "enUS", ApplicationVersion = (int)BgsRealmV2.ClientBuild, WebClientVerification = true }, 1, 91);
         var logonFrames = new[] { BgsFrameReader.ReadNext(tls), BgsFrameReader.ReadNext(tls) };
         Check(logonFrames.All(frame => frame != null), "Logon closed before RPC completion/challenge.");
         var logonAck = logonFrames.Single(frame => frame.Header.ServiceId == 0xFE);
@@ -280,7 +280,7 @@ byte[] V2LogonRequest(byte[] token = null) => Proto(output => {
     output.WriteTag(1, WireFormat.WireType.Varint); output.WriteUInt32(0x576F57);
     output.WriteTag(2, WireFormat.WireType.LengthDelimited); output.WriteString("Win64");
     output.WriteTag(3, WireFormat.WireType.LengthDelimited); output.WriteString("enUS");
-    output.WriteTag(4, WireFormat.WireType.Varint); output.WriteUInt32(70338);
+    output.WriteTag(4, WireFormat.WireType.Varint); output.WriteUInt32(BgsRealmV2.ClientBuild);
     if (token != null) { output.WriteTag(10, WireFormat.WireType.LengthDelimited); output.WriteBytes(ByteString.CopyFrom(BgsAuthenticationV2.TokenResponse(token))); }
     output.WriteTag(100, WireFormat.WireType.Varint); output.WriteUInt32(42); // forward-compatible unknown field
 });
@@ -341,7 +341,7 @@ Run("account_v2_bounded_malformed_requests", () => {
 Run("v2_logon_fields_and_nested_token", () => {
     var expected = Encoding.UTF8.GetBytes("LOCAL_FIXTURE_TOKEN");
     var request = BgsAuthenticationV2.ReadLogon(V2LogonRequest(expected));
-    Check(request.TitleId == 0x576F57 && request.Build == 70338 && request.Platform == "Win64" && request.Locale == "enUS", "V2 field coordinates are wrong.");
+    Check(request.TitleId == 0x576F57 && request.Build == BgsRealmV2.ClientBuild && request.Platform == "Win64" && request.Locale == "enUS", "V2 field coordinates are wrong.");
     Check(request.AuthToken.ToByteArray().SequenceEqual(expected), "Nested v2 token changed.");
 });
 Run("v2_challenge_uses_fields_2_and_3", () => {

@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/advocaite/TrinityCore",
-  "commit": "5a125dfe7031b8abc2a0e32c487a9351577aff0d",
+  "commit": "7d7c05ef83487b8d292584a0e69a2fd1249a5f59",
   "files": [
     {
       "path": "src/server/game/Entities/Object/Updates/UpdateFields.h",
@@ -8,7 +8,7 @@
     },
     {
       "path": "src/server/game/Entities/Object/Updates/UpdateFields.cpp",
-      "gitBlobSha1": "3b623ce2e3790d91fdf8bb8d3cb98b9b6b87cee5"
+      "gitBlobSha1": "2e17bc3a5fb42e9940bec2e21e20717aaff39879"
     },
     {
       "path": "sql/custom/hotfixes/2026_09_28_01_hotfixes_classic_tact_keys.sql",
@@ -20,7 +20,15 @@
     },
     {
       "path": "sql/custom/hotfixes/2026_10_01_02_hotfixes_forever_sniff.sql",
-      "gitBlobSha1": "df948555a120fe86456e00c660547f42065c9ae7"
+      "gitBlobSha1": "dfc7268d87734f1337994c48b8152e0469583934"
+    },
+    {
+      "path": "sql/custom/hotfixes/2026_11_05_00_hotfixes_classic_70790_tact_keys.sql",
+      "gitBlobSha1": "d440614df3c86779de7b060a98aec0c06600a025"
+    },
+    {
+      "path": "sql/custom/hotfixes/2026_11_07_00_hotfixes_classic_70840_tact_keys.sql",
+      "gitBlobSha1": "f91742060bbbbff51067fd94107330729fa76b43"
     },
     {
       "path": "COPYING",

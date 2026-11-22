@@ -52,9 +52,10 @@ internal sealed class SnapshotWriter
     public IEnumerable<IndexEntry> CrossEntries(int archive) => Enumerable.Range(0, 16).Select(b => new IndexEntry(CrossKey(archive, b), archive, b * HeaderSize, HeaderSize));
 
     // Writes one archive from its placed entries; every source entry is checked (key, size, checksums at its old place, BLTE key).
-    // A zero-filled entry is space the agent reserved without downloading the file (the live install has the same hole and would
-    // fetch it on demand); it is copied as it is and reported in holes. Any other data/key mismatch stops the snapshot.
-    public long WriteArchive(int archive, IReadOnlyList<Placed> entries, SourceStorage source, Action<long> progress, List<Key9> holes)
+    // An entry that fails is one the agent listed without writing it (older data or zeros in its place; the live game would
+    // fetch it on demand): fetch gets the CDN's copy. Without one, a zero-filled entry is copied as it is and reported in holes;
+    // any other mismatch stops the snapshot.
+    public long WriteArchive(int archive, IReadOnlyList<Placed> entries, SourceStorage source, Action<long> progress, List<Key9> holes, Func<Key9, byte[]> fetch)
     {
         var temporary = ArchivePath(archive) + ".tmp";
         long written = 0;
@@ -80,15 +81,13 @@ internal sealed class SnapshotWriter
                 if (buffer.Length < entry.Source.Size) buffer = new byte[Math.Max(entry.Source.Size, buffer.Length * 2)];
                 var raw = buffer.AsSpan(0, entry.Source.Size);
                 source.ReadRaw(entry.Source, raw);
-                if (!HeaderKeyMatches(raw, entry.Key) || BinaryPrimitives.ReadInt32LittleEndian(raw[0x10..]) != entry.Source.Size)
-                    throw new InvalidDataException($"Entry {entry.Key} at data.{entry.Source.Archive:D3}+{entry.Source.Offset}: header does not match the index.");
-                if (!ChecksumsValid(raw, entry.Source.Archive, entry.Source.Offset))
-                    throw new InvalidDataException($"Entry {entry.Key} at data.{entry.Source.Archive:D3}+{entry.Source.Offset}: header checksum mismatch in the source.");
-                if (!BlteMatchesKey(raw[HeaderSize..], entry.Key))
+                var headerValid = HeaderKeyMatches(raw, entry.Key) && BinaryPrimitives.ReadInt32LittleEndian(raw[0x10..]) == entry.Source.Size
+                    && ChecksumsValid(raw, entry.Source.Archive, entry.Source.Offset);
+                if (!headerValid || !BlteMatchesKey(raw[HeaderSize..], entry.Key))
                 {
-                    if (raw[HeaderSize..].IndexOfAnyExcept((byte)0) >= 0)
-                        throw new InvalidDataException($"Entry {entry.Key} at data.{entry.Source.Archive:D3}+{entry.Source.Offset}: data does not match its encoding key.");
-                    holes.Add(entry.Key);
+                    if (fetch(entry.Key) is { } copy && copy.Length == raw.Length) copy.CopyTo(raw);
+                    else if (headerValid && raw[HeaderSize..].IndexOfAnyExcept((byte)0) < 0) holes.Add(entry.Key);
+                    else throw new InvalidDataException($"Entry {entry.Key} at data.{entry.Source.Archive:D3}+{entry.Source.Offset} does not match the index or its encoding key, and the CDN has no copy of that size.");
                 }
                 WriteChecksums(raw, archive, entry.Offset);   // bytes 0-0x15 unchanged, so A stays; B follows the new position
                 output.Write(raw);

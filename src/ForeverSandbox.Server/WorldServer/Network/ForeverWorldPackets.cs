@@ -1,4 +1,4 @@
-// Independent 70338 glue-screen packet writers. Factual layouts: pinned 5a125dfe
+// Independent 70888 glue-screen packet writers. Factual layouts: pinned 5a125dfe
 // AuthenticationPackets.cpp, CharacterPackets.cpp, SystemPackets.cpp (Classic
 // FeatureSystemStatusGlueScreen) and ByteBuffer bit order. No reference code imported.
 using System;
@@ -33,11 +33,15 @@ internal sealed class ForeverPacketWriter
 
 internal static class ForeverWorldPackets
 {
+    // Opcode numbering (every Forever*.cs): the 70338 beta's numbers, moved as the reference's ClassicOpcodes.cpp does for
+    // clients from 70755 / 70790 on (the "wowf" product, Wow.exe). The main client group 0x44 gained two messages at 0x71
+    // and 0x72 (older numbers from 0x440071 on are 2 higher) and the main server group 0x47 one at 0xED (older numbers from
+    // 0x4700ED on are 1 higher). The other groups, the handshake and the packet layouts did not change.
     public const uint EnterEncryptedModeOpcode = 0x4E0004, PongOpcode = 0x4E0009;
     public const uint AuthResponseOpcode = 0x470001, EnumCharactersResultOpcode = 0x470018;
-    public const uint FeatureSystemStatusGlueScreenOpcode = 0x470064, SetTimeZoneInformationOpcode = 0x470124;
+    public const uint FeatureSystemStatusGlueScreenOpcode = 0x470064, SetTimeZoneInformationOpcode = 0x470125;
     public const uint EnterEncryptedModeAckOpcode = 0x460005, PingOpcode = 0x460006, LogDisconnectOpcode = 0x460007;
-    public const uint EnumCharactersOpcode = 0x440014, KeepAliveOpcode = 0x4400AB;
+    public const uint EnumCharactersOpcode = 0x440014, KeepAliveOpcode = 0x4400AD;
     public const string RealmName = "Forever Sandbox", NormalizedRealmName = "ForeverSandbox";
 
     // Classic race -> class availability (Human, Orc, Dwarf, Night Elf, Undead, Tauren, Gnome, Troll), the Forever

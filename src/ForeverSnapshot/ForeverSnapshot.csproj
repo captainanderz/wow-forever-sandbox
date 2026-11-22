@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Frozen client snapshot: copies one build (1.60.1.70338) out of the shared Battle.net storage into a standalone install. -->
+  <!-- Frozen client snapshot: copies one build (1.60.1.70888) out of the shared Battle.net storage into a standalone install. -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
